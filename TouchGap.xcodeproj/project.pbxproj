@@ -42,6 +42,13 @@
 		30A0434914DC770100060A13 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 30A0434614DC770100060A13 /* Localizable.strings */; };
 		30E1352710E2C1420031B30D /* Cordova.plist in Resources */ = {isa = PBXBuildFile; fileRef = 30E1352610E2C1420031B30D /* Cordova.plist */; };
 		30E5649213A7FCAF007403D8 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30E5649113A7FCAF007403D8 /* CoreMedia.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		79B184A416716AB900843929 /* TouchDB.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79B184A316716AB900843929 /* TouchDB.framework */; };
+		79B184A616716B4200843929 /* CouchCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79B184A516716B4200843929 /* CouchCocoa.framework */; };
+		79B184A816716C1400843929 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79B184A716716C1400843929 /* libsqlite3.dylib */; };
+		79B184AA16716C3300843929 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79B184A916716C3300843929 /* libz.dylib */; };
+		79B184AC16716C3D00843929 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79B184AB16716C3D00843929 /* Security.framework */; };
+		79B184B216717D8200843929 /* TouchDBListener.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79B184B116717D8200843929 /* TouchDBListener.framework */; };
+		79B184C4167189FA00843929 /* touch.html in Resources */ = {isa = PBXBuildFile; fileRef = 79B184C3167189FA00843929 /* touch.html */; };
 		D4A0D8761607E02300AEF8BB /* Default-568h@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = D4A0D8751607E02300AEF8BB /* Default-568h@2x~iphone.png */; };
 /* End PBXBuildFile section */
 
@@ -102,6 +109,13 @@
 		30E1352610E2C1420031B30D /* Cordova.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Cordova.plist; path = ../Cordova.plist; sourceTree = "<group>"; };
 		30E5649113A7FCAF007403D8 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		32CA4F630368D1EE00C91783 /* TouchGap-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TouchGap-Prefix.pch"; sourceTree = "<group>"; };
+		79B184A316716AB900843929 /* TouchDB.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = TouchDB.framework; sourceTree = "<group>"; };
+		79B184A516716B4200843929 /* CouchCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = CouchCocoa.framework; sourceTree = "<group>"; };
+		79B184A716716C1400843929 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
+		79B184A916716C3300843929 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		79B184AB16716C3D00843929 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		79B184B116717D8200843929 /* TouchDBListener.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = TouchDBListener.framework; sourceTree = "<group>"; };
+		79B184C3167189FA00843929 /* touch.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = touch.html; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* TouchGap-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "TouchGap-Info.plist"; path = "../TouchGap-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		D4A0D8751607E02300AEF8BB /* Default-568h@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x~iphone.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -111,6 +125,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				301BF5BD109A6A2B0062928A /* CFNetwork.framework in Frameworks */,
+				79B184AC16716C3D00843929 /* Security.framework in Frameworks */,
+				79B184AA16716C3300843929 /* libz.dylib in Frameworks */,
+				79B184A816716C1400843929 /* libsqlite3.dylib in Frameworks */,
+				301BF5C5109A6A2B0062928A /* SystemConfiguration.framework in Frameworks */,
 				301BF552109A68D80062928A /* libCordova.a in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
@@ -119,13 +138,14 @@
 				301BF5B7109A6A2B0062928A /* AddressBookUI.framework in Frameworks */,
 				301BF5B9109A6A2B0062928A /* AudioToolbox.framework in Frameworks */,
 				301BF5BB109A6A2B0062928A /* AVFoundation.framework in Frameworks */,
-				301BF5BD109A6A2B0062928A /* CFNetwork.framework in Frameworks */,
 				301BF5BF109A6A2B0062928A /* CoreLocation.framework in Frameworks */,
 				301BF5C1109A6A2B0062928A /* MediaPlayer.framework in Frameworks */,
 				301BF5C3109A6A2B0062928A /* QuartzCore.framework in Frameworks */,
-				301BF5C5109A6A2B0062928A /* SystemConfiguration.framework in Frameworks */,
 				305D5FD1115AB8F900A74A75 /* MobileCoreServices.framework in Frameworks */,
 				30E5649213A7FCAF007403D8 /* CoreMedia.framework in Frameworks */,
+				79B184A416716AB900843929 /* TouchDB.framework in Frameworks */,
+				79B184A616716B4200843929 /* CouchCocoa.framework in Frameworks */,
+				79B184B216717D8200843929 /* TouchDBListener.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -172,6 +192,9 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				79B184AB16716C3D00843929 /* Security.framework */,
+				79B184A916716C3300843929 /* libz.dylib */,
+				79B184A716716C1400843929 /* libsqlite3.dylib */,
 				301BF56E109A69640062928A /* www */,
 				301BF52D109A57CC0062928A /* CordovaLib.xcodeproj */,
 				080E96DDFE201D6D7F000001 /* Classes */,
@@ -206,6 +229,7 @@
 				308D05311370CCF300D202BF /* splash */,
 				30E1352610E2C1420031B30D /* Cordova.plist */,
 				8D1107310486CEB800E47090 /* TouchGap-Info.plist */,
+				79B184C3167189FA00843929 /* touch.html */,
 			);
 			name = Resources;
 			path = TouchGap/Resources;
@@ -214,6 +238,9 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				79B184B116717D8200843929 /* TouchDBListener.framework */,
+				79B184A516716B4200843929 /* CouchCocoa.framework */,
+				79B184A316716AB900843929 /* TouchDB.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 				288765FC0DF74451002DB57D /* CoreGraphics.framework */,
@@ -380,6 +407,7 @@
 				3088BBC1154F3926009F9C59 /* Default@2x~iphone.png in Resources */,
 				3088BBC2154F3926009F9C59 /* Default~iphone.png in Resources */,
 				D4A0D8761607E02300AEF8BB /* Default-568h@2x~iphone.png in Resources */,
+				79B184C4167189FA00843929 /* touch.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -466,6 +494,10 @@
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_WARN_OBJCPP_ARC_ABI = YES;
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -474,6 +506,20 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "TouchGap/TouchGap-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				OTHER_LDFLAGS = (
+					"-weak_framework",
+					CoreFoundation,
+					"-weak_framework",
+					UIKit,
+					"-weak_framework",
+					AVFoundation,
+					"-weak_framework",
+					CoreMedia,
+					"-weak-lSystem",
+					"-all_load",
+					"-ObjC",
+					"-Obj-C",
+				);
 				PRODUCT_NAME = TouchGap;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -486,12 +532,30 @@
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_WARN_OBJCPP_ARC_ABI = YES;
 				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TouchGap/TouchGap-Prefix.pch";
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "TouchGap/TouchGap-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				OTHER_LDFLAGS = (
+					"-weak_framework",
+					CoreFoundation,
+					"-weak_framework",
+					UIKit,
+					"-weak_framework",
+					AVFoundation,
+					"-weak_framework",
+					CoreMedia,
+					"-weak-lSystem",
+					"-all_load",
+					"-ObjC",
+					"-Obj-C",
+				);
 				PRODUCT_NAME = TouchGap;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

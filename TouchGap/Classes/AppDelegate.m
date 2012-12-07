@@ -29,10 +29,12 @@
 #import "MainViewController.h"
 
 #import <Cordova/CDVPlugin.h>
+#import <CouchCocoa/CouchCocoa.h>
+#import <TouchDB/TouchDB.h>
 
 @implementation AppDelegate
 
-@synthesize window, viewController;
+@synthesize window, viewController, database;
 
 - (id)init
 {
@@ -47,6 +49,11 @@
     return self;
 }
 
+- (void) failed:(NSObject*) error
+{
+    NSLog(@"TouchGap error = %@", error);
+}
+
 #pragma UIApplicationDelegate implementation
 
 /**
@@ -54,6 +61,47 @@
  */
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
 {
+    
+    /* TouchDB initialization */
+
+    CouchTouchDBServer* server = [CouchTouchDBServer sharedInstance];
+    if (server.error) [self failed: server.error];
+    self.database = [server databaseNamed: @"myapp"];  // db name must be lowercase!
+    NSError* error;
+    if (![self.database ensureCreated: &error]) [self failed: error];
+    
+    
+    
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"touch" ofType:@"html"];
+	NSFileHandle *readHandle = [NSFileHandle fileHandleForReadingAtPath:path];
+    
+	NSString *htmlString = [[NSString alloc] initWithData:
+                            [readHandle readDataToEndOfFile] encoding:NSUTF8StringEncoding];
+    
+    CouchDocument *doc = [database documentWithID:@"hello"];
+    RESTOperation* op = [doc putProperties:[NSDictionary dictionaryWithObject: @"bar"
+                                                                       forKey: @"foo"]];
+    [op wait];
+    
+    CouchRevision *rev = doc.currentRevision;
+    NSLog(@"make rev %@",rev);
+    
+    
+    CouchAttachment* attach = [rev createAttachmentWithName:@"touch.html" type:@"text/html; charset=utf-8"];
+    op = [attach PUT:[htmlString dataUsingEncoding:NSUTF8StringEncoding]];
+    NSLog(@"make attachment %@",attach);
+    
+    [op wait];
+    NSURL *attachURL = attach.unversionedURL;
+    
+    NSLog(@"attachURL %@",attachURL);
+    
+    NSURL* dburl = [TDURLProtocol HTTPURLForServerURL: database.URL];
+    
+    NSLog(@"TouchDB url = %@", dburl);
+
+    /* PhoneGap initialization */
+
     NSURL* url = [launchOptions objectForKey:UIApplicationLaunchOptionsURLKey];
     NSString* invokeString = nil;
 

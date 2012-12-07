@@ -34,6 +34,8 @@ var app = {
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function() {
         app.receivedEvent('deviceready');
+        var touchDbUrl = 'http://localhost.touchdb./myapp/hello/touch.html'
+        document.body.innerHTML = '<a href="'+touchDbUrl+'">Launch TouchDB Attachment URL</a>';
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
