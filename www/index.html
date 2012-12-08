@@ -12,7 +12,7 @@
     </head>
     <body>
         <header>
-            <input type="text" placeholder="Search">
+            <input type="text" placeholder="Sync Tags">
             <span id="breadcrumbs"></span>
             <nav id="pagenav">
                 <a class="new" href="#/new">New Note</a>
@@ -50,18 +50,12 @@
         </script>
         <script type="text/mustache" id="note-mu">
             <div class="info">
-                <h2>{{title}}
-                {{#page}}
-                  > {{page}}
-                {{/page}}
-                </h2>
                 <span class="tags">{{tags}}</span>
                 <span class="members">{{members}}</span>
             </div>
             <div class="body">{{{body}}}</div>
         </script>
         <script type="text/mustache" id="edit-mu">
-            <h1>Edit: {{title}}</h1>
             <form>
                 <label>Body </label>
                 <br/>

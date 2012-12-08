@@ -42,8 +42,8 @@ $(function(){
     function breadcrumbs(list) {
         var capture = "#/note",
             links = list.map(function(row) {
-                capture = capture + "/" + row;
-                return '<a href="'+capture+'">'+row+'</a>';
+                capture = capture + "/" + row[0];
+                return '<a href="'+capture+'">'+row[1]+'</a>';
             }).join(' > ');
         $("#breadcrumbs").html(links);
     }
@@ -86,11 +86,11 @@ $(function(){
     route("/note/:id", function(e, params) {
         currentNote = params.id;
         nav("home");
-        breadcrumbs([params.id]);
         $("#pagenav a.edit").attr({href:"#/edit/"+currentNote}).show();
 
         console.log("note",params.id);
         coux.get([touchDbUrl,params.id], function(err, doc) {
+            breadcrumbs([[params.id, doc.title]]);
             doc.body = wikiToHtml(doc.markdown);
             console.log($.mustache(t.note, doc), doc, err);
             $('#content').html($.mustache(t.note, doc));
@@ -103,8 +103,15 @@ $(function(){
         currentNote = params.id;
         console.log("/note/:id/:page", params);
         nav("home");
-        breadcrumbs([params.id, params.page]);
         $("#pagenav a.edit").attr({href:"#/edit/"+currentNote+'/'+params.page}).show();
+
+        coux.get([touchDbUrl,params.id+':'+params.page], function(err, doc) {
+            breadcrumbs([[params.id, doc.title],
+                [params.id+':'+params.page, params.page]]);
+            doc.body = wikiToHtml(doc.markdown);
+            console.log($.mustache(t.note, doc), doc, err);
+            $('#content').html($.mustache(t.note, doc));
+        });
 
         $('#content').html($.mustache(t.edit, {
             title : params.page
