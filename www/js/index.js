@@ -1,51 +1,96 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
  */
-var app = {
-    // Application Constructor
-    initialize: function() {
-        this.bindEvents();
-    },
-    // Bind Event Listeners
-    //
-    // Bind any events that are required on startup. Common events are:
-    // 'load', 'deviceready', 'offline', and 'online'.
-    bindEvents: function() {
-        document.addEventListener('deviceready', this.onDeviceReady, false);
-    },
-    // deviceready Event Handler
-    //
-    // The scope of 'this' is the event. In order to call the 'receivedEvent'
-    // function, we must explicity call 'app.receivedEvent(...);'
-    onDeviceReady: function() {
-        app.receivedEvent('deviceready');
-        var touchDbUrl = 'http://localhost.touchdb./myapp/hello/touch.html'
-        document.body.innerHTML = '<a href="'+touchDbUrl+'">Launch TouchDB Attachment URL</a>';
-    },
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
 
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
+var templates;
 
-        console.log('Received Event: ' + id);
-    }
+$(function(){
+    var touchDbUrl = 'http://localhost.touchdb./notes/';
+    helloNotes(touchDbUrl);
+});
+
+function getDoc(id, cb) {
+    cb(true)
+}
+
+
+function helloNotes(touchDbUrl) {
+    var content = $("#content"),
+        t = {
+            notes : $("#notes-mu").html(),
+            edit : $("#edit-mu").html()
+        };
+
+    coux(touchDbUrl, function(err, ok) {
+        console.log(err, ok)
+    })
+
+
+    var showdownConverter = new Showdown.converter(),
+        wikiLinkPrefix = "#/wiki/";
+    function wikiToHtml(string) {
+        return showdownConverter.makeHtml(string.replace(/\[\[(.*)\]\]/gm,"[$1]("+wikiLinkPrefix+"$1)"))
+    };
+
+    content.bindPath("/notes", function() {
+        var st = $.mustache(t.notes, {rows:[
+            {value: "Foo Bar"}, {value : "Baz Bam"}
+            ]})
+        $('#content').html(st);
+    });
+
+    content.bindPath("/edit/:name", function(e, params) {
+        var id = 'wiki:'+Math.random();
+        coux.get(id, function(err, doc) {
+            if (err) {
+                // template for new doc
+                doc = {
+                    _id : id, 
+                    tags : [],
+                    // members : [],
+                    markdown : "Article content goes here. Link to create new pages like this: [[New Page]]"};
+            }
+            $('#content').html($.mustache(t.edit, doc));
+            $("#content form").submit(function() {
+                doc.title = $('input[name="title"]', this).val();
+                doc.markdown = $('textarea', this).val();
+                console.log(doc);
+                pouchdb.put(doc, function(err, ok) {
+                    console.log("put",err,ok)
+                    $.pathbinder.go("#/wiki/"+params.name);
+                });
+                return false;
+            });
+        });
+        $("#pagenav .edit").hide();
+    });
+
+
+
+
+
+
+
+    content.bindPath("/wiki/:name", function(e, params) {
+        var id = 'wiki:' + params.name;
+        getDoc(id, function(err, doc) {
+            console.log("get", err, doc)
+            if (err) {
+                doc = {title : 'Want to create page "'+params.name+'"?', 
+                    markdown : "Article content goes here. Click [edit](#/edit/"+params.name+") to create a page called \""+params.name+"\"."};
+            }
+            console.log("get page", doc)
+            doc.body = wikiToHtml(doc.markdown);
+            $('#content').html($.mustache(ddoc.read, doc));
+        });
+        $("#breadcrumbs").text("> "+params.name)
+        $("#pagenav .edit").attr({href : "#/edit/"+params.name}).show();
+    });
+
+
+
+    $.pathbinder.begin("/notes");
 };
+
