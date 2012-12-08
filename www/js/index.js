@@ -1,96 +1,136 @@
+/*jslint browser: true*/ /*global  $ Showdown console coux*/
 /*
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  */
 
-var templates;
-
 $(function(){
-    var touchDbUrl = 'http://localhost.touchdb./notes/';
-    helloNotes(touchDbUrl);
-});
+    var touchDbUrl = 'http://localhost.touchdb./notes/',
+        content = $("#content"),
+        route = content.bindPath,
+        currentNote = 'currentNote',
+        newDocMarkdown = "Article content goes here. " +
+            "Link to create new pages like this: [[New Page]]", 
+        showdownConverter = new Showdown.converter(),
+        t = {};
 
-function getDoc(id, cb) {
-    cb(true)
-}
-
-
-function helloNotes(touchDbUrl) {
-    var content = $("#content"),
-        t = {
-            notes : $("#notes-mu").html(),
-            edit : $("#edit-mu").html()
-        };
-
-    coux(touchDbUrl, function(err, ok) {
-        console.log(err, ok)
-    })
-
-
-    var showdownConverter = new Showdown.converter(),
-        wikiLinkPrefix = "#/wiki/";
-    function wikiToHtml(string) {
-        return showdownConverter.makeHtml(string.replace(/\[\[(.*)\]\]/gm,"[$1]("+wikiLinkPrefix+"$1)"))
-    };
-
-    content.bindPath("/notes", function() {
-        var st = $.mustache(t.notes, {rows:[
-            {value: "Foo Bar"}, {value : "Baz Bam"}
-            ]})
-        $('#content').html(st);
+    // gather templates
+    $('script[type="text/mustache"]').each(function() {
+        var id = this.id.split('-');
+        id.pop();
+        t[id.join('-')] = $(this).html();
     });
 
-    content.bindPath("/edit/:name", function(e, params) {
-        var id = 'wiki:'+Math.random();
-        coux.get(id, function(err, doc) {
-            if (err) {
-                // template for new doc
-                doc = {
-                    _id : id, 
-                    tags : [],
-                    // members : [],
-                    markdown : "Article content goes here. Link to create new pages like this: [[New Page]]"};
-            }
-            $('#content').html($.mustache(t.edit, doc));
-            $("#content form").submit(function() {
-                doc.title = $('input[name="title"]', this).val();
-                doc.markdown = $('textarea', this).val();
-                console.log(doc);
-                pouchdb.put(doc, function(err, ok) {
-                    console.log("put",err,ok)
-                    $.pathbinder.go("#/wiki/"+params.name);
-                });
-                return false;
+    coux.get(touchDbUrl, function(err, ok) {
+        console.log("touchdb", ok, err);
+    });
+
+    console.log("templates", t);
+
+    function wikiToHtml(string) {
+        var linkPrefix = "#/note/"+currentNote+'/';
+        return showdownConverter.makeHtml(string.replace(/\[\[(.*)\]\]/gm,"[$1]("+linkPrefix+"$1)"));
+    }
+
+    function nav(want) {
+        console.log("nav show", want);
+        $("#pagenav a").hide();
+        $("#pagenav a."+want).show();
+    }
+
+    function breadcrumbs(list) {
+        var capture = "#/note",
+            links = list.map(function(row) {
+                capture = capture + "/" + row;
+                return '<a href="'+capture+'">'+row+'</a>';
+            }).join(' > ');
+        $("#breadcrumbs").html(links);
+    }
+
+    route("/home", function() {
+        nav("new");
+        coux.get([touchDbUrl,"_design","notes","_view","title"], function(err, view) {
+            console.log("view", view);
+            view.rows.forEach(function(row) {
+                row.path = '#/note/'+row.id;
+            });
+            var st = $.mustache(t.index, view);
+            console.log("st", st);
+            $('#content').html(st);
+        });
+    });
+
+
+    route("/new", function(e, params) {
+        nav("home");
+        $('#content').html(t['new']);
+        $('.new-form').submit(function(e) {
+            e.preventDefault();
+            var doc = {
+                _id : (""+Math.random()).slice(2),
+                created_at : new Date(),
+                title : $("[name=title]", this).val(),
+                tags : $("[name=tags]", this).val(),
+                members : $("[name=share]", this).val(),
+                markdown : newDocMarkdown
+            };
+            coux.put([touchDbUrl,doc._id], doc, function(err, ok) {
+                console.log("put",err,ok);
+                $.pathbinder.go("#/note/"+ok.id);
             });
         });
-        $("#pagenav .edit").hide();
     });
 
+    // read the front page of note
+    route("/note/:id", function(e, params) {
+        currentNote = params.id;
+        nav("home");
+        breadcrumbs([params.id]);
+        $("#pagenav a.edit").attr({href:"#/edit/"+currentNote}).show();
 
-
-
-
-
-
-    content.bindPath("/wiki/:name", function(e, params) {
-        var id = 'wiki:' + params.name;
-        getDoc(id, function(err, doc) {
-            console.log("get", err, doc)
-            if (err) {
-                doc = {title : 'Want to create page "'+params.name+'"?', 
-                    markdown : "Article content goes here. Click [edit](#/edit/"+params.name+") to create a page called \""+params.name+"\"."};
-            }
-            console.log("get page", doc)
+        console.log("note",params.id);
+        coux.get([touchDbUrl,params.id], function(err, doc) {
             doc.body = wikiToHtml(doc.markdown);
-            $('#content').html($.mustache(ddoc.read, doc));
+            console.log($.mustache(t.note, doc), doc, err);
+            $('#content').html($.mustache(t.note, doc));
         });
-        $("#breadcrumbs").text("> "+params.name)
-        $("#pagenav .edit").attr({href : "#/edit/"+params.name}).show();
+    });
+
+    // read any other page of a note
+    route("/note/:id/:page", function(e, params) {
+        // load up the app
+        currentNote = params.id;
+        console.log("/note/:id/:page", params);
+        nav("home");
+        breadcrumbs([params.id, params.page]);
+        $("#pagenav a.edit").attr({href:"#/edit/"+currentNote+'/'+params.page}).show();
+
+        $('#content').html($.mustache(t.edit, {
+            title : params.page
+        }));
     });
 
 
+    // edit the front page of a note
+    route("/edit/:id", function(e, params) {
+        console.log("edit", params.id)
+        coux.get([touchDbUrl,params.id], function(err, doc) {
+            $('#content').html($.mustache(t.edit, doc));
+            $('#content form').submit(function(e) {
+                e.preventDefault();
+                doc.body = $("textarea",this).val();
+                coux.put([touchDbUrl,params.id], doc, function(err, ok) {
+                    console.log("saved", err, ok)
+                });
+            });
+        });
+    });
+    
+    // edit any other page of a note
+    route("/edit/:id/:page", function() {
 
-    $.pathbinder.begin("/notes");
-};
+    });
 
+    $.pathbinder.begin("/home");
+});

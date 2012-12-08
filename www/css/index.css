@@ -35,9 +35,27 @@ header {
 form {
     background:#EEE;
     padding:8px 22px;
-    margin-top: -4px
 }
+
+.new-form {
+    text-align: center;
+}
+
 label {
     font-weight: bold;
     color:#333;
+}
+
+.list {
+    text-align: center;
+    list-style: none;
+    font-size: 200%;
+    font-weight: bolder;
+    background:#edeceb;
+    padding:80px 40px;
+}
+
+.list li {
+    margin:20px;
+    background:#dbddbd;
 }

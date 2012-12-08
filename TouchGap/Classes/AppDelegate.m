@@ -72,6 +72,12 @@
     
     NSURL* dburl = [TDURLProtocol HTTPURLForServerURL: database.URL];
     
+    CouchDesignDocument* design = [database designDocumentWithName: @"notes"];
+    [design defineViewNamed: @"title" mapBlock: MAPBLOCK({
+        id title = [doc objectForKey: @"title"];
+        if (title) emit(0, title);
+    }) version: @"1.1"];
+    
     NSLog(@"TouchDB url = %@", dburl);
 
     /* PhoneGap initialization */
