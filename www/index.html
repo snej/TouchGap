@@ -38,15 +38,6 @@
             {{/rows}}
             </ul>
         </script>
-        <script type="text/mustache" id="new-mu">
-            <h2>Start a new note:</h2>
-            <form class="new-form">
-                <input size=30 type="text" name="title" placeholder="Title"><br/>
-                <input size=40 type="text" name="members" placeholder="@names @2share with@example.com"><br/>
-                <input size=40 type="text" name="tags" placeholder="tags, split by commas, for this article"><br/>
-                <input type="submit" value="Start">
-            </form>
-        </script>
         <script type="text/mustache" id="note-mu">
             <div class="edit">
                 <h2>{{{breadcrumbs}}}</h2>
@@ -58,10 +49,25 @@
                     <label for="members">Members:</label>
                     <span name="members">{{members}}</span>
                 </div>
-                <div class="body">{{{body}}}</div>
             </div>
+            <div class="body">{{{body}}}</div>
         </script>
-        <script type="text/mustache" id="edit-mu">
+        <script type="text/mustache" id="edit-page-mu">
+            <form class="edit">
+                <h2>{{{breadcrumbs}}}</h2>
+                <input type="submit" value="Save"/>
+                <div class="details">
+                    <label for="tags">Tags:</label>
+                    <span name="tags">{{tags}}</span>
+                    <br/>
+                    <label for="members">Members:</label>
+                    <span name="members">{{members}}</span>
+                </div>
+                <a class="help" href="http://daringfireball.net/projects/markdown/basics">Markdown help</a>
+            <textarea placeholder="Link to create new pages using WikiWords or Markdown." rows=15 cols=30>{{markdown}}</textarea>
+            </form>
+        </script>
+        <script type="text/mustache" id="edit-note-mu">
             <form class="edit">
                 <h2>{{{breadcrumbs}}}</h2>
                 <input type="submit" value="Save"/>
@@ -72,7 +78,7 @@
                     <label for="members">Members:</label>
                     <input name="members" type="text" value="{{members}}">
                 </div>
-                <textarea rows=20 cols=50>{{markdown}}</textarea>
+                <textarea placeholder="" rows=20 cols=50>{{markdown}}</textarea>
             </form>
         </script>
     </body>

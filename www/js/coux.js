@@ -8,7 +8,11 @@ function coux(opts, body) {
       contentType: 'application/json',
       success: function(doc) {
         console.log(["coux json", doc])
-        cb(false, doc)
+        if (doc.error) {
+          cb(doc);
+        } else {
+          cb(false, doc);
+        }
       },
       error: function(e) {
         // console.log(e.responseText || e)

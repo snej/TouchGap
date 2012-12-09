@@ -17,6 +17,7 @@ input {
 }
 
 textarea {
+    display: block;
    font-family: inherit;
    font-size: inherit;
    width:100%;
@@ -35,29 +36,45 @@ header {
 #pagenav {
     float:right;
 }
+.help {
+    float:right;
+    font-size: 75%
+}
 
 form {
     background:#EEE;
     padding:8px 22px;
 }
 
+.body {
+    padding: 0 16px;
+    margin:0  16px;
+}
+
 .edit {
-    padding: 32px;
+    padding: 16px;
+    margin: 16px;
+    background:#ffffef;
+    border: 1px solid #ee8;
+}
+.edit textarea {
+    margin-top: 16px
 }
 
 .edit input[type=submit] {
-    float:left;
-    margin:32px;
+    float:right;
+    margin:16px 32px;
 }
 
 .details {
-    padding:8px;
+    padding-top:8px;
 }
 
 .edit label {
     float:left;
     display: block;
     width:6em;
+    margin-right: 4px;
     text-align: right;
 }
 
@@ -70,8 +87,8 @@ form.edit input[type=text] {
 }
 
 label {
-    font-weight: bold;
-    color:#333;
+    font-weight: lighter;
+    color:#888;
 }
 
 .list {

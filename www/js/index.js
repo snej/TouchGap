@@ -10,8 +10,7 @@ $(function(){
         content = $("#content"),
         route = content.bindPath,
         currentNote = 'currentNote',
-        newDocMarkdown = "Article content goes here. " +
-            "Link to create new pages like this: [[New Page]]", 
+        newDocMarkdown = "", 
         showdownConverter = new Showdown.converter(),
         t = {};
 
@@ -33,8 +32,11 @@ $(function(){
     console.log("templates", t);
 
     function wikiToHtml(string) {
+        if (!string) return "";
         var linkPrefix = "#/note/"+currentNote+'/';
-        return showdownConverter.makeHtml(string.replace(/\[\[(.*)\]\]/gm,"[$1]("+linkPrefix+"$1)"));
+        string = string.replace(/([A-Z][a-z]*[A-Z][A-Za-z]*)/gm, "[$1]("+linkPrefix+"$1)");
+        string = string.replace(/\[\[(.*)\]\]/gm,"[$1]("+linkPrefix+"$1)");
+        return showdownConverter.makeHtml(string);
     }
 
     function nav(want) {
@@ -43,15 +45,32 @@ $(function(){
         $("#pagenav a."+want).addClass("linked");
     }
 
+    function breadcrumbs_form(note, page) {
+        var capture = "#/note";
+            onNote = true,
+            path = [note];
+        console.log("breadcrumbs",{note:note, page:page})
+        if (page) path.push(page);
+        return path.map(function(row) {
+            capture = capture + "/" + row[0];
+            if (onNote) {
+                onNote = false;
+                return '<input type="text" name="title" value="'+row[1]+'"/>';
+            }
+            return '<a href="'+capture+'">'+row[1]+'</a>';
+        }).join(' > ');
+    }
+
     function breadcrumbs(note, page) {
         var capture = "#/note";
             path = [note];
-        if (page) array.push(page);
+        console.log("breadcrumbs",{note:note, page:page})
+        if (page) path.push(page);
         return path.map(function(row) {
             if (!row) return null;
-                capture = capture + "/" + row[0];
-                return '<a href="'+capture+'">'+row[1]+'</a>';
-            }).join(' > ');
+            capture = capture + "/" + row[0];
+            return '<a href="'+capture+'">'+row[1]+'</a>';
+        }).join(' > ');
     }
 
     route("/home", function() {
@@ -113,21 +132,28 @@ $(function(){
         currentNote = params.id;
         console.log("/note/:id/:page", params);
         nav("home");
-        $("#pagenav a.edit").attr({href:"#/edit/"+currentNote+'/'+params.page}).show();
-
-        coux.get([touchDbUrl,params.id+':'+params.page], function(err, doc) {
+        coux.get([touchDbUrl,params.id], function(err, note) {
             if (!err) {
-                doc.breadcrumbs = breadcrumbs([[params.id, doc.title],
-                    [params.id+':'+params.page, params.page]]);
-                doc.body = wikiToHtml(doc.markdown);
-                console.log($.mustache(t.note, doc), doc, err);
-                $('#content').html($.mustache(t.note, doc));
+                coux.get([touchDbUrl,params.id+':'+params.page], function(err, doc) {
+                    if (!err) {
+                        doc.breadcrumbs = breadcrumbs([params.id, note.title],
+                            [params.page, params.page]);
+                        doc.body = wikiToHtml(doc.markdown);
+                        doc.tags = note.tags;
+                        doc.members = note.members;
+                        console.log("page", doc)
+                        $('#content').html($.mustache(t.note, doc));
+                        $('#content [type="submit"]').click(function() {
+                            $.pathbinder.go("/edit/"+currentNote+'/'+params.page);
+                        });
+                    } else {
+                        $.pathbinder.go("/edit/"+currentNote+'/'+params.page);
+                    }
+                });
             } else {
-                $.pathbinder.go("/edit/"+currentNote+'/'+params.page);
+                $.pathbinder.go("/edit/"+currentNote);
             }
         });
-
-        
     });
 
 
@@ -135,8 +161,8 @@ $(function(){
     route("/edit/:id", function(e, params) {
         console.log("edit", params.id);
         coux.get([touchDbUrl,params.id], function(err, doc) {
-            doc.breadcrumbs = breadcrumbs([params.id, doc.title]);
-            $('#content').html($.mustache(t.edit, doc));
+            doc.breadcrumbs = breadcrumbs_form([params.id, doc.title]);
+            $('#content').html($.mustache(t['edit-note'], doc));
             $('#content form').submit(function(e) {
                 e.preventDefault();
                 doc.markdown = $("textarea",this).val();
@@ -153,17 +179,43 @@ $(function(){
     
     // edit any other page of a note
     route("/edit/:id/:page", function(e, params) {
-        var doc = {
-            title : params.page,
-            markdown : newDocMarkdown
-        };
-        $('#content').html($.mustache(t.edit, doc));
-        $('#content form').submit(function(e) {
-            e.preventDefault();
-            doc.body = $("textarea",this).val();
-            coux.put([touchDbUrl,params.id+':'+params.page], doc, function(err, ok) {
-                console.log("saved", err, ok);
-            });
+        currentNote = params.id;
+        console.log("/edit/:id/:page", params);
+        coux.get([touchDbUrl,params.id], function(err, note) {
+            if (!err) {
+                coux.get([touchDbUrl,params.id+':'+params.page], function(err, doc) {
+                    if (err) {
+                        doc = {
+                            _id : params.id+':'+params.page,
+                            created_at : new Date(),
+                            type : "note",
+                            markdown : newDocMarkdown
+                        };
+                    }
+                    // doc.body = wikiToHtml(doc.markdown);
+
+                    doc.breadcrumbs = breadcrumbs([params.id, note.title],
+                            [params.page, params.page]);
+                    doc.tags = note.tags;
+                    doc.members = note.members;
+                    $('#content').html($.mustache(t['edit-page'], doc));
+                    delete doc.breadcrumbs;
+                    delete doc.tags;
+                    delete doc.members;
+                    $('#content form').submit(function(e) {
+                        e.preventDefault();
+                        doc.markdown = $("textarea", this).val();
+
+                        coux.put([touchDbUrl,doc._id], doc, function(err, ok) {
+                            console.log("saved", err, ok);
+                            $.pathbinder.go("/note/"+note._id+"/"+params.page);
+                        });
+                    });
+
+                });
+            } else {
+                $.pathbinder.go("/edit/"+currentNote);
+            }
         });
     });
 
