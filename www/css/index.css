@@ -21,6 +21,8 @@ textarea {
    font-family: inherit;
    font-size: inherit;
    width:100%;
+   padding:14px;
+   margin:0 -14px;
 }
 
 h2 {
