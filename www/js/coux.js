@@ -7,6 +7,7 @@ function coux(opts, body) {
       dataType: 'json',
       contentType: 'application/json',
       success: function(doc) {
+        console.log(["coux json", doc])
         cb(false, doc)
       },
       error: function(e) {
@@ -62,7 +63,7 @@ function coux(opts, body) {
             req[x] = opts[x];
         }
     }
-    // console.log("req", req)
+    console.log(["coux req", req])
     $.ajax(req);
 };
 

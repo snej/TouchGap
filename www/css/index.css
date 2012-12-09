@@ -22,9 +22,13 @@ textarea {
    width:100%;
 }
 
+h2 {
+    margin: 0;
+}
+
 header {
     padding:8px;
-    margin:-6px;
+    margin:-6px -6px 0 -6px;
     background:#dbddbd;
 }
 
@@ -35,6 +39,30 @@ header {
 form {
     background:#EEE;
     padding:8px 22px;
+}
+
+.edit {
+    padding: 32px;
+}
+
+.edit input[type=submit] {
+    float:left;
+    margin:32px;
+}
+
+.details {
+    padding:8px;
+}
+
+.edit label {
+    float:left;
+    display: block;
+    width:6em;
+    text-align: right;
+}
+
+form.edit input[type=text] {
+    margin-top:4px;
 }
 
 .new-form {
@@ -51,11 +79,15 @@ label {
     list-style: none;
     font-size: 200%;
     font-weight: bolder;
-    background:#edeceb;
     padding:80px 40px;
 }
 
 .list li {
     margin:20px;
-    background:#dbddbd;
+}
+
+.info {
+    padding:8px;
+    margin:6px;
+    background:#dbddbd; 
 }
