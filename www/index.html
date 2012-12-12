@@ -7,24 +7,15 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
         <link rel="stylesheet" type="text/css" href="css/index.css" />
         <title>Hello Notes</title>
     </head>
     <body>
-        <header>
-            <span id="breadcrumbs">Hello Notes</span>
-            <!-- <input type="text" placeholder="Sync Tags"> -->
-            <nav id="pagenav">
-                <a class="new" href="#/new">New</a>
-                <!-- <a class="edit" href="#/edit">Edit</a> -->
-                <a class="home" href="#/home">⌂</a>
-                <!-- <a href="#" title="Reload the browser" onclick="location.
-                reload();">↻</a> -->
-                <!-- <a href="http://animal.local:3000/index.html">A</a> -->
-            </nav>
-            <br/>
-        </header>
-        <div id="content"></div>
+        <nav id="sidebar">
+        </nav>
+        <section id="content">
+        </section>
         <script type="text/javascript" src="cordova-2.2.0.js"></script>
         <script type="text/javascript" src="js/jquery.js"></script>
         <script type="text/javascript" src="js/jquery.mustache.js"></script>
@@ -33,53 +24,65 @@
         <script type="text/javascript" src="js/showdown.min.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
         <!-- mustache templates -->
-        <script type="text/mustache" id="index-mu">
-            <ul class="list">
+        <script type="text/mustache" id="sidebar-mu">
+            <header>
+                <span>Hello Notes</span>
+                <input class="new" type="submit" value="New"/>
+                <div class="clear"/>
+            </header>
+            <ul>
             {{#rows}}
                 <li><a href="{{path}}">{{value}}</a></li>
             {{/rows}}
             </ul>
         </script>
         <script type="text/mustache" id="note-mu">
-            <div class="edit">
-                <h2>{{{breadcrumbs}}}</h2>
-                <input type="submit" value="Edit"/>
-                <div class="details">
-                    <label for="tags">Tags:</label>
-                    <span name="tags">{{tags}}</span>
-                    <br/>
-                    <label for="members">Members:</label>
-                    <span name="members">{{members}}</span>
-                </div>
+            <header>
+            <input class="save" type="submit" value="Edit"/>
+                <h2>
+                    {{#note}}
+                        {{title}}
+                    {{/note}}
+                    {{#page_id}}
+                    > {{page_id}}
+                    {{/page_id}}
+                </h2>
+            </header>
+            <div class="details">
+                <label for="tags">Tags:</label>
+                <span name="tags">{{tags}}</span>
+                <br/>
+                <label for="members">Members:</label>
+                <span name="members">{{members}}</span>
             </div>
-            <div class="body">{{{body}}}</div>
-        </script>
-        <script type="text/mustache" id="edit-page-mu">
-            <form class="edit">
-                <h2>{{{breadcrumbs}}}</h2>
-                <input type="submit" value="Save"/>
-                <div class="details">
-                    <label for="tags">Tags:</label>
-                    <span name="tags">{{tags}}</span>
-                    <br/>
-                    <label for="members">Members:</label>
-                    <span name="members">{{members}}</span>
-                </div>
-                <a class="help" href="http://daringfireball.net/projects/markdown/basics">Markdown help</a>
-            <textarea placeholder="Link to create new pages using WikiWords or [[double brackets]]." rows=15 cols=30>{{markdown}}</textarea>
-            </form>
+            <article>{{{body}}}</article>
         </script>
         <script type="text/mustache" id="edit-note-mu">
-            <form class="edit">
-                <h2>{{{breadcrumbs}}}</h2>
-                <input type="submit" value="Save"/>
+            <header class="grey">
+            <input class="save" type="submit" value="Save"/>
+                <h2>
+                    <input type="text" name="title" value="{{title}}"/>
+                </h2>
+            </header>
+            <form class="note">
                 <div class="details">
                     <label for="tags">Tags:</label>
-                    <input name="tags" type="text" value="{{tags}}">
+                    <input size="50" name="tags" type="text" value="{{tags}}">
                     <br/>
                     <label for="members">Members:</label>
-                    <input name="members" type="text" value="{{members}}">
+                    <input size="50" name="members" type="text" value="{{members}}">
                 </div>
+                <textarea placeholder="Link to create new pages using WikiWords or [[double brackets]]." rows=20 cols=50>{{markdown}}</textarea>
+            </form>
+        </script>
+        <script type="text/mustache" id="edit-page-mu">
+            <header class="grey">
+            <input class="save" type="submit" value="Save"/>
+            <h2>
+                {{title}} > {{page_id}}
+            </h2>
+            </header>
+            <form class="note">
                 <textarea placeholder="Link to create new pages using WikiWords or [[double brackets]]." rows=20 cols=50>{{markdown}}</textarea>
             </form>
         </script>

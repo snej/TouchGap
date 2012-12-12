@@ -10,7 +10,7 @@ $(function(){
         content = $("#content"),
         route = content.bindPath,
         currentNote = 'currentNote',
-        newDocMarkdown = "", 
+        newDocMarkdown = "",
         showdownConverter = new Showdown.converter(),
         t = {};
 
@@ -25,11 +25,15 @@ $(function(){
         t[id.join('-')] = $(this).html();
     });
 
-    coux.get(touchDbUrl, function(err, ok) {
-        console.log("touchdb", ok, err);
-    });
-
-    console.log("templates", t);
+    // coux.get(touchDbUrl, function(err, ok) {
+    //     console.log("touchdb", ok, err);
+    //     coux.post(["_replicator"], {
+    //         source : "http://animal.local:5984/notes",
+    //         target : "notes"
+    //     },function(err, ok) {
+    //         console.log("syncing", err, ok)
+    //     })
+    // });
 
     function wikiToHtml(string) {
         if (!string) return "";
@@ -37,12 +41,6 @@ $(function(){
         string = string.replace(/([A-Z][a-z]*[A-Z][A-Za-z]*)/gm, "[$1]("+linkPrefix+"$1)");
         string = string.replace(/\[\[(.*)\]\]/gm,"[$1]("+linkPrefix+"$1)");
         return showdownConverter.makeHtml(string);
-    }
-
-    function nav(want) {
-        console.log("nav show", want);
-        $("#pagenav a").removeClass("linked");
-        $("#pagenav a."+want).addClass("linked");
     }
 
     function breadcrumbs_form(note, page) {
@@ -73,79 +71,82 @@ $(function(){
         }).join(' > ');
     }
 
-    route("/home", function() {
-        nav("new");
-        coux.get([touchDbUrl,"_design","notes","_view","title", {descending:true, limit:100}], function(err, view) {
-            console.log("view", view);
+    function drawSidebar(cb) {
+        coux.get([touchDbUrl,"_design","notes","_view","title",
+            {descending:true, limit:100}], function(err, view) {
             view.rows.forEach(function(row) {
                 row.path = '#/note/'+row.id;
             });
-            var st = $.mustache(t.index, view);
-            console.log("st", st);
-            $('#content').html(st);
+            var st = $.mustache(t.sidebar, view);
+            $('#sidebar').html(st);
+            $("#sidebar input").click(function() {
+                $.pathbinder.go("#/edit/_new");
+            })
+            if (cb) {
+                cb(err, view);
+            }
         });
+    };
+
+    function drawPage(note, page, cb) {
+        currentNote = note._id;
+        var data = {
+            body : wikiToHtml((page || note).markdown),
+            tags : note.tags,
+            members : note.members,
+            note : note,
+            page_id : (page ? page._id.split(':').pop() : null)
+        };
+        var st = $.mustache(t.note, data);
+        $('#content').html(st);
+        $('input.save').click(function() {
+            var path = note._id;
+            if (page) path += "/"+data.page_id;
+            $.pathbinder.go("/edit/"+path);
+        })
+        if (cb) {cb()};
+    };
+
+    $('textarea').bind('focus',function(event){
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+    });
+    $('textarea').bind('blur',function(event){
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
     });
 
-
-    route("/new", function(e, params) {
-        nav("home");
-        $('#content').html(t['new']);
-        $('.new-form [name=title]').focus();
-        $('.new-form').submit(function(e) {
-            e.preventDefault();
-            var doc = {
-                _id : (""+Math.random()).slice(2),
-                created_at : new Date(),
-                type : "note",
-                title : $("[name=title]", this).val(),
-                tags : $("[name=tags]", this).val(),
-                members : $("[name=share]", this).val(),
-                markdown : newDocMarkdown
-            };
-            coux.put([touchDbUrl,doc._id], doc, function(err, ok) {
-                console.log("put",err,ok);
-                $.pathbinder.go("/note/"+ok.id);
+    route("/home", function() {
+        drawSidebar(function(err, view) {
+            var id = view.rows[0].id;
+            coux.get([touchDbUrl,id], function(err, doc) {
+                drawPage(doc, null);
             });
-        });
+        })
     });
 
     // read the front page of note
     route("/note/:id", function(e, params) {
+        drawSidebar();
         currentNote = params.id;
-        nav("home");
-
-        console.log("note",params.id);
         coux.get([touchDbUrl,params.id], function(err, doc) {
-            doc.breadcrumbs = breadcrumbs([params.id, doc.title]);
-            doc.body = wikiToHtml(doc.markdown);
-            console.log($.mustache(t.note, doc), doc, err);
-            $('#content').html($.mustache(t.note, doc));
-            $('#content [type="submit"]').click(function() {
-                $.pathbinder.go("/edit/"+doc._id);
-            })
+            if (err) {
+                console.log("error", err);
+                return;
+            }
+            drawPage(doc, null)
         });
     });
 
     // read any other page of a note
     route("/note/:id/:page", function(e, params) {
-        // load up the app
+        drawSidebar();
         currentNote = params.id;
-        console.log("/note/:id/:page", params);
-        nav("home");
         coux.get([touchDbUrl,params.id], function(err, note) {
             if (!err) {
-                coux.get([touchDbUrl,params.id+':'+params.page], function(err, doc) {
+                coux.get([touchDbUrl,params.id+':'+params.page], function(err, page) {
                     if (!err) {
-                        doc.breadcrumbs = breadcrumbs([params.id, note.title],
-                            [params.page, params.page]);
-                        doc.body = wikiToHtml(doc.markdown);
-                        doc.tags = note.tags;
-                        doc.members = note.members;
-                        console.log("page", doc)
-                        $('#content').html($.mustache(t.note, doc));
-                        $('#content [type="submit"]').click(function() {
-                            $.pathbinder.go("/edit/"+currentNote+'/'+params.page);
-                        });
+                        drawPage(note, page);
                     } else {
                         $.pathbinder.go("/edit/"+currentNote+'/'+params.page);
                     }
@@ -159,56 +160,77 @@ $(function(){
 
     // edit the front page of a note
     route("/edit/:id", function(e, params) {
-        console.log("edit", params.id);
-        coux.get([touchDbUrl,params.id], function(err, doc) {
-            doc.breadcrumbs = breadcrumbs_form([params.id, doc.title]);
-            $('#content').html($.mustache(t['edit-note'], doc));
+        drawSidebar();
+        var newNote = {
+                _id : params.id == "_new" ? (""+Math.random()).slice(2) : params.id,
+                created_at : new Date(),
+                type : "note"
+            };
+        function withNote(err, note) {
+            if (err) {
+                note = newNote;
+            }
+            $('#content').html($.mustache(t['edit-note'], note));
+            $('input.save').click(function() {
+                $('#content form').submit();
+            });
             $('#content form').submit(function(e) {
                 e.preventDefault();
-                doc.markdown = $("textarea",this).val();
-                doc.tags = $("[name=tags]",this).val();
-                doc.members = $("[name=members]",this).val();
-                delete doc.breadcrumbs;
-                coux.put([touchDbUrl,params.id], doc, function(err, ok) {
+                note.title = $("[name=title]").val();
+                note.markdown = $("textarea",this).val();
+                note.tags = $("[name=tags]",this).val();
+                note.members = $("[name=members]",this).val();
+                note.updated_at = new Date();
+                coux.put([touchDbUrl,note._id], note, function(err, ok) {
                     console.log("saved", err, ok);
-                    $.pathbinder.go("/note/"+params.id);
+                    if (!err) $.pathbinder.go("/note/"+params.id);
                 });
             });
-        });
+        }
+        if (newNote.id == "_new") {
+            console.log("_newNote",newNote);
+            withNote(false, newNote);
+        } else {
+            console.log("get note");
+            coux.get([touchDbUrl,params.id], withNote);
+        }
     });
-    
+
+
+    function drawPageForm (page) {
+
+    }
     // edit any other page of a note
     route("/edit/:id/:page", function(e, params) {
         currentNote = params.id;
-        console.log("/edit/:id/:page", params);
+        drawSidebar();
         coux.get([touchDbUrl,params.id], function(err, note) {
             if (!err) {
-                coux.get([touchDbUrl,params.id+':'+params.page], function(err, doc) {
+                coux.get([touchDbUrl,params.id+':'+params.page], function(err, page) {
                     if (err) {
-                        doc = {
+                        page = {
                             _id : params.id+':'+params.page,
                             created_at : new Date(),
-                            type : "note",
-                            markdown : newDocMarkdown
+                            type : "page"
                         };
                     }
-                    // doc.body = wikiToHtml(doc.markdown);
-
-                    doc.breadcrumbs = breadcrumbs([params.id, note.title],
-                            [params.page, params.page]);
-                    doc.tags = note.tags;
-                    doc.members = note.members;
-                    $('#content').html($.mustache(t['edit-page'], doc));
-                    delete doc.breadcrumbs;
-                    delete doc.tags;
-                    delete doc.members;
+                    var data = {
+                        markdown : page.markdown,
+                        title : note.title,
+                        page_id : params.page
+                    };
+                    $('#content').html($.mustache(t['edit-page'], data));
+                    $('input.save').click(function() {
+                        $('#content form').submit();
+                    });
                     $('#content form').submit(function(e) {
                         e.preventDefault();
-                        doc.markdown = $("textarea", this).val();
-
-                        coux.put([touchDbUrl,doc._id], doc, function(err, ok) {
+                        page.markdown = $("textarea", this).val();
+                        note.updated_at = page.updated_at = new Date();
+                        coux.put([touchDbUrl,page._id], page, function(err, ok) {
                             console.log("saved", err, ok);
                             $.pathbinder.go("/note/"+note._id+"/"+params.page);
+                            coux.put([touchDbUrl, note._id], note, function() {});
                         });
                     });
 
