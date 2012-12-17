@@ -6,7 +6,8 @@
  */
 
 $(function(){
-    var touchDbUrl = 'http://localhost.touchdb./notes/',
+var touchDbHost = 'http://localhost.touchdb./',
+        dbUrl = touchDbHost+'notes/',
         content = $("#content"),
         route = content.bindPath,
         currentNote = 'currentNote',
@@ -15,7 +16,7 @@ $(function(){
         t = {};
 
     if (location.protocol != "file:") {
-        touchDbUrl = location.origin + "/notes/";
+        dbUrl = location.origin + "/notes/";
     }
 
     // gather templates
@@ -25,15 +26,38 @@ $(function(){
         t[id.join('-')] = $(this).html();
     });
 
-    // coux.get(touchDbUrl, function(err, ok) {
-    //     console.log("touchdb", ok, err);
-    //     coux.post(["_replicator"], {
-    //         source : "http://animal.local:5984/notes",
-    //         target : "notes"
-    //     },function(err, ok) {
-    //         console.log("syncing", err, ok)
-    //     })
-    // });
+    // trigger replication
+    coux.get(dbUrl, function(err, ok) {
+        console.log("touchdb", err, ok);
+        console.log("touchDbHost", touchDbHost)
+
+        coux.post([touchDbHost, "_replicate"], {
+            source : "http://animal.local:4984/channelsync",
+            target : "notes",
+            continuous : true,
+            filter : "channelsync/bychannel",
+            query_params : {
+                channels : "5737529525067657"
+            }
+        },function(err, ok) {
+            console.log("syncing down", err, ok)
+        })
+        coux.post([touchDbHost, "_replicate"], {
+            target : "http://animal.local:4984/channelsync",
+            source : "notes",
+            continuous : true
+        },function(err, ok) {
+            console.log("syncing up", err, ok)
+        })
+    });
+
+    coux.changes(dbUrl, function(err, changes) {
+        console.log("change", err, changes);
+        var matches = window.location.toString().match(/^[^#]*#(.+)$/);
+        if (matches && matches[1] && !/edit/.test(matches[1])) {
+            $.pathbinder.go(matches[1])
+        }
+    });
 
     function wikiToHtml(string) {
         if (!string) return "";
@@ -72,7 +96,7 @@ $(function(){
     }
 
     function drawSidebar(cb) {
-        coux.get([touchDbUrl,"_design","notes","_view","title",
+        coux.get([dbUrl,"_design","notes","_view","title",
             {descending:true, limit:100}], function(err, view) {
             view.rows.forEach(function(row) {
                 row.path = '#/note/'+row.id;
@@ -119,7 +143,7 @@ $(function(){
     route("/home", function() {
         drawSidebar(function(err, view) {
             var id = view.rows[0].id;
-            coux.get([touchDbUrl,id], function(err, doc) {
+            coux.get([dbUrl,id], function(err, doc) {
                 drawPage(doc, null);
             });
         })
@@ -129,7 +153,7 @@ $(function(){
     route("/note/:id", function(e, params) {
         drawSidebar();
         currentNote = params.id;
-        coux.get([touchDbUrl,params.id], function(err, doc) {
+        coux.get([dbUrl,params.id], function(err, doc) {
             if (err) {
                 console.log("error", err);
                 return;
@@ -142,9 +166,9 @@ $(function(){
     route("/note/:id/:page", function(e, params) {
         drawSidebar();
         currentNote = params.id;
-        coux.get([touchDbUrl,params.id], function(err, note) {
+        coux.get([dbUrl,params.id], function(err, note) {
             if (!err) {
-                coux.get([touchDbUrl,params.id+':'+params.page], function(err, page) {
+                coux.get([dbUrl,params.id+':'+params.page], function(err, page) {
                     if (!err) {
                         drawPage(note, page);
                     } else {
@@ -181,7 +205,7 @@ $(function(){
                 note.tags = $("[name=tags]",this).val();
                 note.members = $("[name=members]",this).val();
                 note.updated_at = new Date();
-                coux.put([touchDbUrl,note._id], note, function(err, ok) {
+                coux.put([dbUrl,note._id], note, function(err, ok) {
                     console.log("saved", err, ok);
                     if (!err) $.pathbinder.go("/note/"+params.id);
                 });
@@ -192,7 +216,7 @@ $(function(){
             withNote(false, newNote);
         } else {
             console.log("get note");
-            coux.get([touchDbUrl,params.id], withNote);
+            coux.get([dbUrl,params.id], withNote);
         }
     });
 
@@ -204,9 +228,9 @@ $(function(){
     route("/edit/:id/:page", function(e, params) {
         currentNote = params.id;
         drawSidebar();
-        coux.get([touchDbUrl,params.id], function(err, note) {
+        coux.get([dbUrl,params.id], function(err, note) {
             if (!err) {
-                coux.get([touchDbUrl,params.id+':'+params.page], function(err, page) {
+                coux.get([dbUrl,params.id+':'+params.page], function(err, page) {
                     if (err) {
                         page = {
                             _id : params.id+':'+params.page,
@@ -227,10 +251,10 @@ $(function(){
                         e.preventDefault();
                         page.markdown = $("textarea", this).val();
                         note.updated_at = page.updated_at = new Date();
-                        coux.put([touchDbUrl,page._id], page, function(err, ok) {
+                        coux.put([dbUrl,page._id], page, function(err, ok) {
                             console.log("saved", err, ok);
                             $.pathbinder.go("/note/"+note._id+"/"+params.page);
-                            coux.put([touchDbUrl, note._id], note, function() {});
+                            coux.put([dbUrl, note._id], note, function() {});
                         });
                     });
 
