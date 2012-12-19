@@ -61,7 +61,7 @@
  */
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
 {
-    
+
     /* TouchDB initialization */
 
     CouchTouchDBServer* server = [CouchTouchDBServer sharedInstance];
@@ -69,15 +69,16 @@
     self.database = [server databaseNamed: @"notes"];  // db name must be lowercase!
     NSError* error;
     if (![self.database ensureCreated: &error]) [self failed: error];
-    
+
     NSURL* dburl = [TDURLProtocol HTTPURLForServerURL: database.URL];
-    
-    CouchDesignDocument* design = [database designDocumentWithName: @"notes"];
+
+    CouchDesignDocument* design = [database designDocumentWithName: @"wiki"];
     [design defineViewNamed: @"title" mapBlock: MAPBLOCK({
         id title = [doc objectForKey: @"title"];
-        if (title) emit(0, title);
+        id updated = [doc objectForKey: @"updated_at"];
+        if (title && updated) emit(updated, title);
     }) version: @"1.1"];
-    
+
     NSLog(@"TouchDB url = %@", dburl);
 
     /* PhoneGap initialization */

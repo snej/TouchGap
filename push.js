@@ -6,11 +6,8 @@ var couchapp = require("couchapp"),
 var designUrl = "http://animal.local:4984/channelsync/_design/channels";
 
 function syncFun(doc) {
-	var matches = doc._id.match(/(.*):.*/);
-	if (matches && matches[1]) {
-		sync(matches[1]);
-	} else if (doc.type == "note") {
-		sync(doc._id);
+	if (doc.page_id) {
+		sync(doc.page_id);
 	}
 }
 

@@ -9,7 +9,7 @@
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <link rel="stylesheet" type="text/css" href="css/index.css" />
-        <title>Hello Notes</title>
+        <title>Wiki Notes</title>
     </head>
     <body>
         <nav id="sidebar">
@@ -26,7 +26,7 @@
         <!-- mustache templates -->
         <script type="text/mustache" id="sidebar-mu">
             <header>
-                <span>Hello Notes</span>
+                <span>Wiki Notes</span>
                 <input class="new" type="submit" value="New"/>
                 <div class="clear"/>
             </header>
@@ -35,6 +35,21 @@
                 <li><a href="{{path}}">{{value}}</a></li>
             {{/rows}}
             </ul>
+        </script>
+        <script type="text/mustache" id="login-mu">
+            <h2>Login or Signup</h2>
+            <br/>
+            <form>
+            <label>Username:</label>
+                <input type="text" placeholder="username"></input>
+                <br/>
+            <label>Password:</label>
+                <input type="password"></input>
+                <br/>
+                <input type="submit" value="Login / Signup"></input>
+            </form>
+            <p>You only need to enter this once. If you choose a username
+            that is not on the server yet, you get a new account. If you choose a name you chose on another device, you have to get the password right.</p>
         </script>
         <script type="text/mustache" id="note-mu">
             <header>

@@ -6,18 +6,19 @@
  */
 
 $(function(){
-var touchDbHost = 'http://localhost.touchdb./',
-        dbUrl = touchDbHost+'notes/',
+    var touchDbHost = 'http://localhost.touchdb.';
+
+    if (location.protocol != "file:") {
+        touchDbHost = location.origin;
+    }
+
+    var dbUrl = touchDbHost+'/notes/',
         content = $("#content"),
         route = content.bindPath,
         currentNote = 'currentNote',
         newDocMarkdown = "",
         showdownConverter = new Showdown.converter(),
         t = {};
-
-    if (location.protocol != "file:") {
-        dbUrl = location.origin + "/notes/";
-    }
 
     // gather templates
     $('script[type="text/mustache"]').each(function() {
@@ -26,30 +27,55 @@ var touchDbHost = 'http://localhost.touchdb./',
         t[id.join('-')] = $(this).html();
     });
 
-    // trigger replication
-    coux.get(dbUrl, function(err, ok) {
-        console.log("touchdb", err, ok);
-        console.log("touchDbHost", touchDbHost)
+    var pullRep, pushRep,
+      pullPath = [touchDbHost, "_replicator", "channel_pull"],
+      pushPath = [touchDbHost, "_replicator", "channel_push"];
 
-        coux.post([touchDbHost, "_replicate"], {
-            source : "http://animal.local:4984/channelsync",
-            target : "notes",
-            continuous : true,
-            filter : "channelsync/bychannel",
-            query_params : {
-                channels : "5737529525067657"
+    function refreshSyncDoc(path, rep, cb) {
+      coux.get(path, function(err, ok) {
+        if (err) {
+          console.log("newdoc", path);
+          // make a new doc
+          coux.put(path, rep, cb);
+        } else {
+          // delete it and make a new doc
+          var revpath = path.concat({rev:ok._rev})
+          console.log("revpath", revpath);
+          coux.del(revpath, function(err, ok) {
+            if (err) {
+              console.log("couldn't delete", err, revpath)
             }
-        },function(err, ok) {
-            console.log("syncing down", err, ok)
-        })
-        coux.post([touchDbHost, "_replicate"], {
-            target : "http://animal.local:4984/channelsync",
+            coux.put(path, rep, cb);
+          })
+        }
+      });
+    }
+    function refreshSync() {
+      refreshSyncDoc(pullPath, pullRep, function(err, ok) {
+        console.log("pullRep", err, ok)
+      })
+      refreshSyncDoc(pushPath, pushRep, function(err, ok) {
+        console.log("pushRep", err, ok)
+      })
+    }
+    function syncTheseChannels(user, channels) {
+        pullRep = {
+          source : "http://"+user.user+":"+user.pass+"@animal.local:4984/channelsync",
+          target : "notes",
+          // continuous : true,
+          filter : "channelsync/bychannel",
+          query_params : {
+              channels : channels.join(',')
+          }
+        };
+        pushRep = {
+            target : "http://"+user.user+":"+user.pass+"@animal.local:4984/channelsync",
             source : "notes",
             continuous : true
-        },function(err, ok) {
-            console.log("syncing up", err, ok)
-        })
-    });
+        };
+        refreshSync()
+        setInterval(refreshSync,10000);
+    }
 
     coux.changes(dbUrl, function(err, changes) {
         console.log("change", err, changes);
@@ -67,43 +93,17 @@ var touchDbHost = 'http://localhost.touchdb./',
         return showdownConverter.makeHtml(string);
     }
 
-    function breadcrumbs_form(note, page) {
-        var capture = "#/note";
-            onNote = true,
-            path = [note];
-        console.log("breadcrumbs",{note:note, page:page})
-        if (page) path.push(page);
-        return path.map(function(row) {
-            capture = capture + "/" + row[0];
-            if (onNote) {
-                onNote = false;
-                return '<input type="text" name="title" value="'+row[1]+'"/>';
-            }
-            return '<a href="'+capture+'">'+row[1]+'</a>';
-        }).join(' > ');
-    }
 
-    function breadcrumbs(note, page) {
-        var capture = "#/note";
-            path = [note];
-        console.log("breadcrumbs",{note:note, page:page})
-        if (page) path.push(page);
-        return path.map(function(row) {
-            if (!row) return null;
-            capture = capture + "/" + row[0];
-            return '<a href="'+capture+'">'+row[1]+'</a>';
-        }).join(' > ');
-    }
 
     function drawSidebar(cb) {
-        coux.get([dbUrl,"_design","notes","_view","title",
+        coux.get([dbUrl,"_design","wiki","_view","title",
             {descending:true, limit:100}], function(err, view) {
             view.rows.forEach(function(row) {
                 row.path = '#/note/'+row.id;
             });
             var st = $.mustache(t.sidebar, view);
             $('#sidebar').html(st);
-            $("#sidebar input").click(function() {
+            $("#sidebar input.new").click(function() {
                 $.pathbinder.go("#/edit/_new");
             })
             if (cb) {
@@ -131,14 +131,14 @@ var touchDbHost = 'http://localhost.touchdb./',
         if (cb) {cb()};
     };
 
-    $('textarea').bind('focus',function(event){
-        window.scrollTo(0, 0);
-        document.body.scrollTop = 0;
-    });
-    $('textarea').bind('blur',function(event){
-        window.scrollTo(0, 0);
-        document.body.scrollTop = 0;
-    });
+    // $('textarea').bind('focus',function(event){
+    //     window.scrollTo(0, 0);
+    //     document.body.scrollTop = 0;
+    // });
+    // $('textarea').bind('blur',function(event){
+    //     window.scrollTo(0, 0);
+    //     document.body.scrollTop = 0;
+    // });
 
     route("/home", function() {
         drawSidebar(function(err, view) {
@@ -147,6 +147,31 @@ var touchDbHost = 'http://localhost.touchdb./',
                 drawPage(doc, null);
             });
         })
+    });
+
+    function syncForUser(userDoc, cb) {
+      coux.post("http://animal.local:3000/channels/", userDoc, function(err, channels) {
+          console.log(err, channels)
+          if (cb) {cb(err, channels);}
+          syncTheseChannels(userDoc, channels);
+      });
+    };
+
+    route("/login", function() {
+      $('#content').html($.mustache(t['login']));
+      $("#content form").submit(function() {
+        var me = $("input[type=text]",this).val(),
+          pass = $("input[type=password]",this).val(),
+          localUser = {user : me, pass: pass};
+        syncForUser(localUser, function(err, ok) {
+          if (!err) {
+            saveLocalUser(localUser, function(err, ok) {
+              $.pathbinder.go("/home");
+            });
+          }
+        });
+        return false;
+      });
     });
 
     // read the front page of note
@@ -190,6 +215,7 @@ var touchDbHost = 'http://localhost.touchdb./',
                 created_at : new Date(),
                 type : "note"
             };
+        newNote.page_id = newNote._id;
         function withNote(err, note) {
             if (err) {
                 note = newNote;
@@ -221,7 +247,7 @@ var touchDbHost = 'http://localhost.touchdb./',
     });
 
 
-    function drawPageForm (page) {
+    function editNestedPage (page) {
 
     }
     // edit any other page of a note
@@ -265,5 +291,27 @@ var touchDbHost = 'http://localhost.touchdb./',
         });
     });
 
-    $.pathbinder.begin("/home");
+    function getLocalUser(cb) {
+      coux([dbUrl, "_local/user"], cb);
+    };
+
+    function saveLocalUser(doc, cb) {
+      coux.put([dbUrl, "_local/user"], doc, cb);
+    }
+
+    function startApp() {
+      // get the _local login doc
+      // if (ever) logged in, go home, else go to login
+      getLocalUser(function(err, localUser) {
+        if (err) {
+          $.pathbinder.go("/login");
+        } else {
+          syncForUser(localUser);
+          $.pathbinder.begin("/home");
+        }
+      });
+    };
+    startApp();
+
+
 });

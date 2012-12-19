@@ -20,7 +20,7 @@ function coux(opts, body) {
         cb(e)
       }
   };
-    if (typeof opts === 'string' || $.isArray(opts)) { 
+    if (typeof opts === 'string' || $.isArray(opts)) {
         opts = {url:opts};
     }
     if (arguments.length == 3) {
@@ -51,7 +51,7 @@ function coux(opts, body) {
                   if (/\/$/.test(path)) {
                     return path.substring(0,path.length-1)
                   } else {
-                    return path;                    
+                    return path;
                   }
                 }
             }
@@ -73,7 +73,7 @@ function coux(opts, body) {
 
 coux.put = function() {
     var opts = arguments[0];
-    if (typeof opts === 'string' || Array.isArray(opts)) { 
+    if (typeof opts === 'string' || Array.isArray(opts)) {
         opts = {url:opts};
     }
     opts.type = "PUT";
@@ -84,10 +84,20 @@ coux.put = function() {
 
 coux.post = function() {
     var opts = arguments[0];
-    if (typeof opts === 'string' || Array.isArray(opts)) { 
+    if (typeof opts === 'string' || Array.isArray(opts)) {
         opts = {url:opts};
     }
     opts.type = "POST";
+    arguments[0] = opts;
+    coux.apply(this, arguments);
+};
+
+coux.del = function() {
+    var opts = arguments[0];
+    if (typeof opts === 'string' || Array.isArray(opts)) {
+        opts = {url:opts};
+    }
+    opts.type = "DELETE";
     arguments[0] = opts;
     coux.apply(this, arguments);
 };
@@ -100,7 +110,7 @@ coux.changes = function(dbname, onDBChange) {
       since = opts.last_seq || since;
       if (opts.results) {onDBChange(opts);}
       coux([dbname, '_changes', {feed : 'longpoll', since : since}], function(err, data) {
-          if (!err) { 
+          if (!err) {
               changesCallback(data)
           } else {
               setTimeout(function() {
