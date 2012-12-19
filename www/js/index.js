@@ -34,13 +34,13 @@ $(function(){
     function refreshSyncDoc(path, rep, cb) {
       coux.get(path, function(err, ok) {
         if (err) {
-          console.log("newdoc", path);
+          console.log("newdoc", err, path);
           // make a new doc
           coux.put(path, rep, cb);
         } else {
           // delete it and make a new doc
           var revpath = path.concat({rev:ok._rev})
-          console.log("revpath", revpath);
+          console.log("deleting revpath", revpath);
           coux.del(revpath, function(err, ok) {
             if (err) {
               console.log("couldn't delete", err, revpath)
@@ -74,7 +74,7 @@ $(function(){
             continuous : true
         };
         refreshSync()
-        setInterval(refreshSync,10000);
+        // setInterval(refreshSync,10000);
     }
 
     coux.changes(dbUrl, function(err, changes) {
