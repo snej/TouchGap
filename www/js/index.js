@@ -50,12 +50,23 @@ $(function(){
         }
       });
     }
-    function refreshSync() {
-      refreshSyncDoc(pullPath, pullRep, function(err, ok) {
-        console.log("pullRep", err, ok)
+    function refreshSyncOnce(path, rep, cb) {
+      var cancel = JSON.parse(JSON.stringify(rep));
+      cancel.cancel = true;
+      coux.post([touchDbHost, "_replicate"], cancel, function() {
+        coux.post([touchDbHost, "_replicate"], rep, cb)
       })
-      refreshSyncDoc(pushPath, pushRep, function(err, ok) {
+    }
+    function refreshPush() {
+      var doSync = false ? refreshSyncDoc : refreshSyncOnce;
+      doSync(pushPath, pushRep, function(err, ok) {
         console.log("pushRep", err, ok)
+      })
+    }
+    function refreshPull() {
+      var doSync = false ? refreshSyncDoc : refreshSyncOnce;
+      doSync(pullPath, pullRep, function(err, ok) {
+        console.log("pullRep", err, ok)
       })
     }
     function syncTheseChannels(user, channels) {
@@ -73,8 +84,9 @@ $(function(){
             source : "notes",
             continuous : true
         };
-        refreshSync()
-        // setInterval(refreshSync,10000);
+        refreshPush()
+        refreshPull()
+        setInterval(refreshPull,10000);
     }
 
     coux.changes(dbUrl, function(err, changes) {
