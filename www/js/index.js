@@ -154,12 +154,11 @@ $(function(){
     });
 
     route("/home", function() {
-        drawSidebar(function(err, view) {
+      coux.get([dbUrl,"_design","wiki","_view","title",
+          {descending:true, limit:1}], function(err, view) {
             var id = view.rows[0] && view.rows[0].id;
-            coux.get([dbUrl,id], function(err, doc) {
-                drawPage(doc, null);
-            });
-        })
+            $.pathbinder.go("/wiki/"+id);
+        });
     });
 
     var syncInterval;
