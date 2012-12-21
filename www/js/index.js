@@ -129,6 +129,7 @@ $(function(){
         var data = {
             body : wikiToHtml((page || wiki).markdown),
             tags : wiki.tags,
+            title : wiki.title,
             members : wiki.members,
             wiki_id : currentWiki,
             page_id : (page ? page._id.split(':').pop() : null)
