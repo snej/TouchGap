@@ -3,7 +3,7 @@ var couchapp = require("couchapp"),
 	fs = require("fs");
 
 
-var designUrl = "http://animal.local:4984/channelsync/_design/channels";
+var designUrl = "http://animal.local:4984/basecouch/_design/channels";
 
 function syncFun(doc) {
 	if (doc.wiki_id) {

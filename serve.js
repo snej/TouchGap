@@ -27,7 +27,7 @@ function handleChannelsRequest(req, res) {
           password : data.pass
         };
       // find channels with this user id:
-      coux([CouchbaseViews+"/channelsync/_design/wiki/_view/by_members",
+      coux([CouchbaseViews+"/basecouch/_design/wiki/_view/by_members",
           {stale:false,group:true,connection_timeout:60000,
             start_key : [data.user], end_key : [data.user, {}]}],
         function(err, view) {
@@ -78,8 +78,12 @@ function handleChannelsRequest(req, res) {
 
   req.on('end', function() {
     // empty 200 OK response for now
-    console.log(chunk)
-    handleChannelBody(chunk)
+    if (chunk) {
+      console.log("body",chunk)
+      handleChannelBody(chunk)
+    } else {
+      console.log("empty body");
+    }
   });
 
 }

@@ -7,7 +7,7 @@
 
 $(function(){
     var touchDbHost = 'http://localhost.touchdb.',
-        BaseCouchUrl = 'animal.local:4984/channelsync',
+        BaseCouchUrl = 'animal.local:4984/basecouch',
         SyncServerPath = 'http://animal.local:3000/channels/';
     if (location.protocol != "file:") {
         touchDbHost = location.origin;
@@ -74,8 +74,8 @@ $(function(){
         pullRep = {
           source : "http://"+user.user+":"+user.pass+"@"+BaseCouchUrl,
           target : "wiki",
-          // continuous : true,
-          filter : "channelsync/bychannel",
+          continuous : true,
+          filter : "basecouch/bychannel",
           query_params : {
               channels : channels.join(',')
           }
@@ -163,16 +163,17 @@ $(function(){
     });
 
     var syncInterval;
-    function syncForUser(userDoc, cb) { // silly cache
+    function syncForUser(userDoc, cb) {
       if (!syncInterval) {
         syncInterval = setInterval(function() {
           syncForUser(LocalUserDoc);
         },10000);
       }
 
-
+      console.log("syncForUser", userDoc);
+                                // silly cache
       coux.post(SyncServerPath+'?r='+Math.random(), userDoc, function(err, channels) {
-          if (err) console.log(err);
+          if (err) console.log("ch err", err);
           console.log("channels", channels);
           if (cb) {cb(err, channels);}
           syncTheseChannels(userDoc, channels);
