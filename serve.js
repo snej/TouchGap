@@ -6,6 +6,11 @@ var coux = require('coux');
 var baseCouch = "http://localhost:4984";
 var baseCouchAuth = "http://localhost:4985";
 var CouchbaseViews = "http://localhost:8092"
+
+var push = require("./push");
+
+push.go();
+
 coux.put("http://localhost:4985/GUEST", {
   name: "GUEST", password : "GUEST",
   channels : []

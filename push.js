@@ -11,7 +11,7 @@ function syncFun(doc) {
 	}
 }
 
-var CouchbaseServerMapFunction = function (doc, meta) {
+var ByMembersBucketView = function (doc, meta) {
   var i, ms = (doc.members||"").split(" ");
   if (ms && ms.length) { ms = ms;
     for (i = ms - 1; i >= 0; i--) {
@@ -20,7 +20,20 @@ var CouchbaseServerMapFunction = function (doc, meta) {
   }
 }
 
+function doPushBucketView() {
+  var designUrl = "http://animal.local:8091/couchBase/basecouch/_design/wiki";
 
+  var ddoc = {
+    views : {
+      "by_members" : {reduce : "_count", map : ByMembersBucketView}
+    }
+  };
+  ddoc._id = "_design/wiki";
+
+  couchapp.createApp(ddoc, designUrl, function(app) {
+      app.push(console.log)
+  });
+};
 
 function doPushApp() {
 	var ddoc = {
@@ -33,4 +46,8 @@ function doPushApp() {
 	});
 };
 
-doPushApp();
+
+exports.go = function() {
+  doPushApp();
+  doPushBucketView();
+};
