@@ -144,11 +144,11 @@ $(function(){
         if (cb) {cb()};
     };
 
-    $('textarea').bind('focus',function(event){
+    $('body').bind('focus',function(event){
         window.scrollTo(0, 0);
         document.body.scrollTop = 0;
     });
-    $('textarea').bind('blur',function(event){
+    $('body').bind('blur',function(event){
         window.scrollTo(0, 0);
         document.body.scrollTop = 0;
     });
