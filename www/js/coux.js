@@ -8,7 +8,7 @@ function coux(opts, body) {
       contentType: 'application/json',
       success: function(doc) {
         console.log(["coux json", doc])
-        if (doc.error) {
+        if (!doc || doc.error) {
           cb(doc);
         } else {
           cb(false, doc);
@@ -58,8 +58,8 @@ function coux(opts, body) {
             return encodeURIComponent(path);
         })).join('/');
 
-        if (query) {
-            opts.url = opts.url + "?" + query;
+        if (query.toString()) {
+            opts.url = opts.url + "?" + query.toString();
         }
     }
     for (var x in opts) {

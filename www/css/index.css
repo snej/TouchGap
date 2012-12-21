@@ -4,9 +4,22 @@
  *
  */
 
+ /* iPad [portrait + landscape] */
+ @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+    body {
+        font-size: 180%;
+    }
+ }
+
+ /* iPhone [portrait + landscape] */
+/* @media only screen and (max-device-width: 480px) {
+    body {
+        font-size: 100%;
+    }
+ }*/
+
 body {
     font-family: sans-serif;
-    font-size: 180%;
     margin:0; padding: 0;
 }
 
@@ -124,14 +137,14 @@ header .new {
     font-size: 75%
 }
 
-form.note {
+form.wiki {
     border:#ddd solid 1px;
     background:#EEE;
     margin: 3em 32px;
     padding: 8px;
 }
 
-#content form.note .details {
+#content form.wiki .details {
     margin-top: 0;
 }
 

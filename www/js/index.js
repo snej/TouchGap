@@ -6,19 +6,20 @@
  */
 
 $(function(){
-    var touchDbHost = 'http://localhost.touchdb.';
-
+    var touchDbHost = 'http://localhost.touchdb.',
+        BaseCouchUrl = 'animal.local:4984/channelsync',
+        SyncServerPath = 'http://animal.local:3000/channels/';
     if (location.protocol != "file:") {
         touchDbHost = location.origin;
     }
 
-    var dbUrl = touchDbHost+'/notes/',
+    var dbUrl = touchDbHost+'/wiki/',
         content = $("#content"),
         route = content.bindPath,
-        currentNote = 'currentNote',
+        currentWiki = 'currentWiki',
         newDocMarkdown = "",
         showdownConverter = new Showdown.converter(),
-        t = {};
+        t = {}; //templates
 
     // gather templates
     $('script[type="text/mustache"]').each(function() {
@@ -71,8 +72,8 @@ $(function(){
     }
     function syncTheseChannels(user, channels) {
         pullRep = {
-          source : "http://"+user.user+":"+user.pass+"@animal.local:4984/channelsync",
-          target : "notes",
+          source : "http://"+user.user+":"+user.pass+"@"+BaseCouchUrl,
+          target : "wiki",
           // continuous : true,
           filter : "channelsync/bychannel",
           query_params : {
@@ -80,13 +81,12 @@ $(function(){
           }
         };
         pushRep = {
-            target : "http://"+user.user+":"+user.pass+"@animal.local:4984/channelsync",
-            source : "notes",
+            target : "http://"+user.user+":"+user.pass+"@"+BaseCouchUrl,
+            source : "wiki",
             continuous : true
         };
         refreshPush()
         refreshPull()
-        setInterval(refreshPull,10000);
     }
 
     coux.changes(dbUrl, function(err, changes) {
@@ -99,7 +99,7 @@ $(function(){
 
     function wikiToHtml(string) {
         if (!string) return "";
-        var linkPrefix = "#/note/"+currentNote+'/';
+        var linkPrefix = "#/wiki/"+currentWiki+'/';
         string = string.replace(/([A-Z][a-z]*[A-Z][A-Za-z]*)/gm, "[$1]("+linkPrefix+"$1)");
         string = string.replace(/\[\[(.*)\]\]/gm,"[$1]("+linkPrefix+"$1)");
         return showdownConverter.makeHtml(string);
@@ -111,7 +111,7 @@ $(function(){
         coux.get([dbUrl,"_design","wiki","_view","title",
             {descending:true, limit:100}], function(err, view) {
             view.rows.forEach(function(row) {
-                row.path = '#/note/'+row.id;
+                row.path = '#/wiki/'+row.id;
             });
             var st = $.mustache(t.sidebar, view);
             $('#sidebar').html(st);
@@ -124,46 +124,55 @@ $(function(){
         });
     };
 
-    function drawPage(note, page, cb) {
-        currentNote = note._id;
+    function drawPage(wiki, page, cb) {
+        currentWiki = wiki._id;
         var data = {
-            body : wikiToHtml((page || note).markdown),
-            tags : note.tags,
-            members : note.members,
-            note : note,
+            body : wikiToHtml((page || wiki).markdown),
+            tags : wiki.tags,
+            members : wiki.members,
+            wiki_id : currentWiki,
             page_id : (page ? page._id.split(':').pop() : null)
         };
-        var st = $.mustache(t.note, data);
+        var st = $.mustache(t.wiki, data);
         $('#content').html(st);
         $('input.save').click(function() {
-            var path = note._id;
+            var path = wiki._id;
             if (page) path += "/"+data.page_id;
             $.pathbinder.go("/edit/"+path);
         })
         if (cb) {cb()};
     };
 
-    // $('textarea').bind('focus',function(event){
-    //     window.scrollTo(0, 0);
-    //     document.body.scrollTop = 0;
-    // });
-    // $('textarea').bind('blur',function(event){
-    //     window.scrollTo(0, 0);
-    //     document.body.scrollTop = 0;
-    // });
+    $('textarea').bind('focus',function(event){
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+    });
+    $('textarea').bind('blur',function(event){
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+    });
 
     route("/home", function() {
         drawSidebar(function(err, view) {
-            var id = view.rows[0].id;
+            var id = view.rows[0] && view.rows[0].id;
             coux.get([dbUrl,id], function(err, doc) {
                 drawPage(doc, null);
             });
         })
     });
 
-    function syncForUser(userDoc, cb) {
-      coux.post("http://animal.local:3000/channels/", userDoc, function(err, channels) {
-          console.log(err, channels)
+    var syncInterval;
+    function syncForUser(userDoc, cb) { // silly cache
+      if (!syncInterval) {
+        syncInterval = setInterval(function() {
+          syncForUser(LocalUserDoc);
+        },10000);
+      }
+
+
+      coux.post(SyncServerPath+'?r='+Math.random(), userDoc, function(err, channels) {
+          if (err) console.log(err);
+          console.log("channels", channels);
           if (cb) {cb(err, channels);}
           syncTheseChannels(userDoc, channels);
       });
@@ -175,21 +184,25 @@ $(function(){
         var me = $("input[type=text]",this).val(),
           pass = $("input[type=password]",this).val(),
           localUser = {user : me, pass: pass};
+        console.log("localUser "+me);
         syncForUser(localUser, function(err, ok) {
           if (!err) {
             saveLocalUser(localUser, function(err, ok) {
+              LocalUserName = localUser.user;
               $.pathbinder.go("/home");
             });
-          }
+          } else {
+            console.log("error syncing", err);
+            console.log(err);}
         });
         return false;
       });
     });
 
-    // read the front page of note
-    route("/note/:id", function(e, params) {
+    // read the front page of wiki
+    route("/wiki/:id", function(e, params) {
         drawSidebar();
-        currentNote = params.id;
+        currentWiki = params.id;
         coux.get([dbUrl,params.id], function(err, doc) {
             if (err) {
                 console.log("error", err);
@@ -199,62 +212,65 @@ $(function(){
         });
     });
 
-    // read any other page of a note
-    route("/note/:id/:page", function(e, params) {
+    // read any other page of a wiki
+    route("/wiki/:id/:page", function(e, params) {
         drawSidebar();
-        currentNote = params.id;
-        coux.get([dbUrl,params.id], function(err, note) {
+        currentWiki = params.id;
+        coux.get([dbUrl,params.id], function(err, wiki) {
             if (!err) {
                 coux.get([dbUrl,params.id+':'+params.page], function(err, page) {
                     if (!err) {
-                        drawPage(note, page);
+                        drawPage(wiki, page);
                     } else {
-                        $.pathbinder.go("/edit/"+currentNote+'/'+params.page);
+                        $.pathbinder.go("/edit/"+currentWiki+'/'+params.page);
                     }
                 });
             } else {
-                $.pathbinder.go("/edit/"+currentNote);
+                $.pathbinder.go("/edit/"+currentWiki);
             }
         });
     });
 
 
-    // edit the front page of a note
+    // edit the front page of a wiki
     route("/edit/:id", function(e, params) {
         drawSidebar();
-        var newNote = {
+        var newWiki = {
                 _id : params.id == "_new" ? (""+Math.random()).slice(2) : params.id,
                 created_at : new Date(),
-                type : "note"
+                members : LocalUserName,
+                type : "wiki"
             };
-        newNote.page_id = newNote._id;
-        function withNote(err, note) {
+        newWiki.wiki_id = newWiki._id;
+        function withWiki(err, wiki) {
             if (err) {
-                note = newNote;
+                console.log("withWiki", err)
+                wiki = newWiki;
             }
-            $('#content').html($.mustache(t['edit-note'], note));
+            console.log("edit form");
+            $('#content').html($.mustache(t['edit-wiki'], wiki));
             $('input.save').click(function() {
                 $('#content form').submit();
             });
             $('#content form').submit(function(e) {
                 e.preventDefault();
-                note.title = $("[name=title]").val();
-                note.markdown = $("textarea",this).val();
-                note.tags = $("[name=tags]",this).val();
-                note.members = $("[name=members]",this).val();
-                note.updated_at = new Date();
-                coux.put([dbUrl,note._id], note, function(err, ok) {
+                wiki.title = $("[name=title]").val();
+                wiki.markdown = $("textarea",this).val();
+                wiki.tags = $("[name=tags]",this).val();
+                wiki.members = $("[name=members]",this).val();
+                wiki.updated_at = new Date();
+                coux.put([dbUrl,wiki._id], wiki, function(err, ok) {
                     console.log("saved", err, ok);
-                    if (!err) $.pathbinder.go("/note/"+params.id);
+                    if (!err) $.pathbinder.go("/wiki/"+wiki._id);
                 });
             });
         }
-        if (newNote.id == "_new") {
-            console.log("_newNote",newNote);
-            withNote(false, newNote);
+        if (params.id == "_new") {
+            console.log("_newWiki",newWiki);
+            withWiki(false, newWiki);
         } else {
-            console.log("get note");
-            coux.get([dbUrl,params.id], withNote);
+            console.log("get wiki");
+            coux.get([dbUrl,params.id], withWiki);
         }
     });
 
@@ -262,23 +278,25 @@ $(function(){
     function editNestedPage (page) {
 
     }
-    // edit any other page of a note
+    // edit any other page of a wiki
     route("/edit/:id/:page", function(e, params) {
-        currentNote = params.id;
+        currentWiki = params.id;
         drawSidebar();
-        coux.get([dbUrl,params.id], function(err, note) {
+        coux.get([dbUrl,params.id], function(err, wiki) {
             if (!err) {
                 coux.get([dbUrl,params.id+':'+params.page], function(err, page) {
                     if (err) {
                         page = {
                             _id : params.id+':'+params.page,
                             created_at : new Date(),
-                            type : "page"
+                            type : "page",
+                            wiki_id : params.id
                         };
                     }
                     var data = {
                         markdown : page.markdown,
-                        title : note.title,
+                        title : wiki.title,
+                        wiki_id : params.id,
                         page_id : params.page
                     };
                     $('#content').html($.mustache(t['edit-page'], data));
@@ -288,17 +306,17 @@ $(function(){
                     $('#content form').submit(function(e) {
                         e.preventDefault();
                         page.markdown = $("textarea", this).val();
-                        note.updated_at = page.updated_at = new Date();
+                        wiki.updated_at = page.updated_at = new Date();
                         coux.put([dbUrl,page._id], page, function(err, ok) {
                             console.log("saved", err, ok);
-                            $.pathbinder.go("/note/"+note._id+"/"+params.page);
-                            coux.put([dbUrl, note._id], note, function() {});
+                            $.pathbinder.go("/wiki/"+wiki._id+"/"+params.page);
+                            coux.put([dbUrl, wiki._id], wiki, function() {});
                         });
                     });
 
                 });
             } else {
-                $.pathbinder.go("/edit/"+currentNote);
+                $.pathbinder.go("/edit/"+currentWiki);
             }
         });
     });
@@ -314,16 +332,19 @@ $(function(){
     function startApp() {
       // get the _local login doc
       // if (ever) logged in, go home, else go to login
+      console.log("Starting App at "+dbUrl);
       getLocalUser(function(err, localUser) {
         if (err) {
           $.pathbinder.go("/login");
         } else {
-          syncForUser(localUser);
-          $.pathbinder.begin("/home");
+          LocalUserDoc = localUser;
+          LocalUserName = localUser.user;
+          syncForUser(LocalUserDoc);
+          $.pathbinder.go("/home");
         }
       });
     };
+    var LocalUserName, LocalUserDoc;
     startApp();
-
 
 });

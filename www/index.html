@@ -51,13 +51,13 @@
             <p>You only need to enter this once. If you choose a username
             that is not on the server yet, you get a new account. If you choose a name you chose on another device, you have to get the password right.</p>
         </script>
-        <script type="text/mustache" id="note-mu">
+        <script type="text/mustache" id="wiki-mu">
             <header>
             <input class="save" type="submit" value="Edit"/>
                 <h2>
-                    {{#note}}
+                    {{#wiki}}
                         {{title}}
-                    {{/note}}
+                    {{/wiki}}
                     {{#page_id}}
                     > {{page_id}}
                     {{/page_id}}
@@ -72,14 +72,14 @@
             </div>
             <article>{{{body}}}</article>
         </script>
-        <script type="text/mustache" id="edit-note-mu">
+        <script type="text/mustache" id="edit-wiki-mu">
             <header class="grey">
             <input class="save" type="submit" value="Save"/>
                 <h2>
                     <input type="text" name="title" value="{{title}}"/>
                 </h2>
             </header>
-            <form class="note">
+            <form class="wiki">
                 <div class="details">
                     <label for="tags">Tags:</label>
                     <input size="50" name="tags" type="text" value="{{tags}}">
@@ -97,7 +97,7 @@
                 {{title}} > {{page_id}}
             </h2>
             </header>
-            <form class="note">
+            <form class="wiki">
                 <textarea placeholder="Link to create new pages using WikiWords or [[double brackets]]." rows=20 cols=50>{{markdown}}</textarea>
             </form>
         </script>

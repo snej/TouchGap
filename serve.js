@@ -5,7 +5,7 @@ var coux = require('coux');
 
 var baseCouch = "http://localhost:4984";
 var baseCouchAuth = "http://localhost:4985";
-
+var CouchbaseViews = "http://localhost:8092"
 coux.put("http://localhost:4985/GUEST", {
   name: "GUEST", password : "GUEST",
   channels : []
@@ -27,27 +27,37 @@ function handleChannelsRequest(req, res) {
           password : data.pass
         };
       // find channels with this user id:
-      coux(["http://127.0.0.1:8092/channelsync/_design/wiki/_view/by_members",
-          {group:true,connection_timeout:60000,
+      coux([CouchbaseViews+"/channelsync/_design/wiki/_view/by_members",
+          {stale:false,group:true,connection_timeout:60000,
             start_key : [data.user], end_key : [data.user, {}]}],
         function(err, view) {
+          if (err && err.reason == "not_found") {
+            return console.error(err);
+            } else if (err) {
+            return console.error(err);
+          };
+
           var channelIds = view.rows.map(function(r) {return r.key[1]});
           res.statusCode = 200;
-          console.log("channels", channelIds);
+          console.log("channels"+channelIds);
           baseCouchData.channels = channelIds;
-          coux("http://localhost:4985/"+data.user, function(err, ok) {
-            console.log("get", err, ok)
-            if (err && ok.statusCode == 404) {
+          coux([baseCouchAuth,data.user], function(err, existingUserDoc) {
+            console.log("get", err, existingUserDoc)
+            if (err && existingUserDoc.statusCode == 404) {
               // we can create a new user with this password
-              coux.put("http://localhost:4985/"+data.user, baseCouchData, function(err, ok) {
+              coux.put([baseCouchAuth,data.user], baseCouchData, function(err, ok) {
+                console.log("put new user", err, baseCouchData, ok);
                 res.end(JSON.stringify(baseCouchData.channels));
               });
             } else if (!err) {
               // todo we should validate the password
-              delete baseCouchData.password;
+              existingUserDoc.channels = baseCouchData.channels;
+/////////// here we need to update the existingUserDoc?
+
               // update the existing user with the new channels
-              coux.put("http://localhost:4985/"+data.user, baseCouchData, function(err, ok) {
-                res.end(JSON.stringify(baseCouchData.channels));
+              coux.put([baseCouchAuth,data.user], existingUserDoc, function(err, ok) {
+                console.log("put existing user", err, existingUserDoc, ok);
+                res.end(JSON.stringify(existingUserDoc.channels));
               });
             }
           });
@@ -83,7 +93,7 @@ var app = http.createServer(function(req, res){
   var test
   var path = url.parse(req.url).pathname;
   console.log("GET", path)
-  if (/^\/(notes|_replicate)/.test(path)) {
+  if (/^\/(wiki|_replicate)/.test(path)) {
     var proxy = http.createClient(5984, 'localhost')
     var proxyRequest = proxy.request(req.method, req.url, req.headers);
     proxyRequest.on('response', function (proxyResponse) {

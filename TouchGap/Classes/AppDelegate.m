@@ -66,7 +66,7 @@
 
     CouchTouchDBServer* server = [CouchTouchDBServer sharedInstance];
     if (server.error) [self failed: server.error];
-    self.database = [server databaseNamed: @"notes"];  // db name must be lowercase!
+    self.database = [server databaseNamed: @"wiki"];  // db name must be lowercase!
     NSError* error;
     if (![self.database ensureCreated: &error]) [self failed: error];
 
