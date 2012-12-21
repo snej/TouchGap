@@ -12,10 +12,11 @@ function syncFun(doc) {
 }
 
 var ByMembersBucketView = function (doc, meta) {
-  var i, ms = (doc.members||"").split(" ");
-  if (ms && ms.length) { ms = ms;
-    for (i = ms - 1; i >= 0; i--) {
-      if (ms[i]) emit(ms[i],1);
+  var i, ms;
+  if (doc.wiki_id && doc.members) {
+    ms = doc.members.split(" ");
+    for (i = ms.length - 1; i >= 0; i--) {
+      if (ms[i]) emit([ms[i], doc.wiki_id],doc.title);
     }
   }
 }
