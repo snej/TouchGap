@@ -4,6 +4,7 @@ var couchapp = require("couchapp"),
 
 
 var designUrl = "http://animal.local:4984/basecouch/_design/channels";
+var bucketDesignUrl = "http://animal.local:8091/couchBase/basecouch/_design/wiki";
 
 function syncFun(doc) {
 	if (doc.wiki_id) {
@@ -22,8 +23,6 @@ var ByMembersBucketView = function (doc, meta) {
 }
 
 function doPushBucketView() {
-  var designUrl = "http://animal.local:8091/couchBase/basecouch/_design/wiki";
-
   var ddoc = {
     views : {
       "by_members" : {reduce : "_count", map : ByMembersBucketView}
@@ -31,7 +30,7 @@ function doPushBucketView() {
   };
   ddoc._id = "_design/wiki";
 
-  couchapp.createApp(ddoc, designUrl, function(app) {
+  couchapp.createApp(ddoc, bucketDesignUrl, function(app) {
       app.push(console.log)
   });
 };
