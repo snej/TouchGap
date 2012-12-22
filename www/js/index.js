@@ -161,7 +161,7 @@ $(function(){
         });
     });
 
-    var syncInterval;
+    var syncInterval = false;
     function syncForUser(userDoc, cb) {
       if (!syncInterval) {
         syncInterval = setInterval(function() {
