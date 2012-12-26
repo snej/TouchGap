@@ -6,6 +6,12 @@
  */
 
 $(function(){
+  // split into:
+  // config, app, sync, auth, main
+
+  // config
+var Config = {};
+
     var touchDbHost = 'http://localhost.touchdb.',
         BaseCouchUrl = 'animal.local:4984/basecouch',
         SyncServerPath = 'http://animal.local:3000/channels/';
@@ -27,6 +33,9 @@ $(function(){
         id.pop();
         t[id.join('-')] = $(this).html();
     });
+
+// sync
+var WikiSync = {};
 
     var pullRep, pushRep,
       pullPath = [touchDbHost, "_replicator", "channel_pull"],
@@ -88,6 +97,10 @@ $(function(){
         refreshPush()
         refreshPull()
     }
+
+
+// app
+var WikiApp = {};
 
     coux.changes(dbUrl, function(err, changes) {
         console.log("change", err, changes);
@@ -161,6 +174,8 @@ $(function(){
         });
     });
 
+// sync
+
     var syncInterval = false;
     function syncForUser(userDoc, cb) {
       if (!syncInterval) {
@@ -178,6 +193,8 @@ $(function(){
           syncTheseChannels(userDoc, channels);
       });
     };
+
+// auth
 
     route("/login", function() {
       $('#content').html($.mustache(t['login']));
@@ -200,6 +217,7 @@ $(function(){
       });
     });
 
+//
     // read the front page of wiki
     route("/wiki/:id", function(e, params) {
         drawSidebar();
