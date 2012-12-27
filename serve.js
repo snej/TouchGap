@@ -2,14 +2,26 @@ var http = require('http');
 var send = require('send');
 var url = require('url');
 var coux = require('coux');
+var fs = require('fs');
+var browserify = require('browserify');
 
 var baseCouch = "http://localhost:4984";
 var baseCouchAuth = "http://localhost:4985";
 var CouchbaseViews = "http://localhost:8092"
 
 var push = require("./push");
-
 push.go();
+
+var b = browserify({watch : true});
+b.addEntry("./www/js/app.js");
+b.on('bundle', function() {
+  var src = b.bundle();
+  if (!b.ok) return;
+  fs.writeFile("./www/js/output.js", src, function () {
+    console.log(Buffer(src).length + ' bytes written to output.js');
+  });
+})
+b.emit("bundle");
 
 coux.put("http://localhost:4985/GUEST", {
   name: "GUEST", password : "GUEST",

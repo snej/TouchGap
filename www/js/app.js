@@ -6,9 +6,9 @@ $(function() {
     route = require('./route');
 
     route("/login", function() {
-      console.log("login!", mustache, config.t.login)
       $('#content').html(mustache.render(config.t.login));
-      $("#content form").submit(function() {
+      $("#content form").submit(function(e) {
+        e.preventDefault();
         var me = $("input[type=text]",this).val(),
           pass = $("input[type=password]",this).val();
         auth.login({user : me, pass: pass}, function(err, ok) {
@@ -21,6 +21,4 @@ $(function() {
 
     $.pathbinder.begin("/home")
 });
-
-
 
