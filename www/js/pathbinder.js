@@ -18,7 +18,7 @@
       return triggerOnPath(_currentPath);
     }
   }
-  
+
   $.pathbinder = {
     changeFuns : [],
     paths : [],
@@ -30,7 +30,7 @@
         if (loadPath) {
           triggerOnPath(loadPath);
         } else {
-          goPath(defaultPath);          
+          goPath(defaultPath);
           triggerOnPath(defaultPath);
         }
       })
@@ -48,7 +48,7 @@
   };
 
   function pollPath(every) {
-    function hashCheck() {        
+    function hashCheck() {
       _currentPath = getPath();
       // path changed if _currentPath != _lastPath
       if (_lastPath != _currentPath) {
@@ -111,7 +111,7 @@
     var newPath = $.mustache(pathSpec.template, params);
     goPath(newPath);
   };
-  
+
   function goPath(newPath) {
     if (newPath) {
       // $.log("goPath", newPath)
@@ -119,7 +119,7 @@
     }
     _lastPath = getPath();
   };
-  
+
   function getPath() {
     var matches = window.location.toString().match(/^[^#]*(#.+)$/);
     return matches ? matches[1] : '';
@@ -128,9 +128,9 @@
   function makePathSpec(path, callback) {
     var param_names = [];
     var template = "";
-    
+
     PATH_NAME_MATCHER.lastIndex = 0;
-    
+
     while ((path_match = PATH_NAME_MATCHER.exec(path)) !== null) {
       param_names.push(path_match[1]);
     }

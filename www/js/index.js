@@ -28,11 +28,7 @@ var Config = {};
         t = {}; //templates
 
     // gather templates
-    $('script[type="text/mustache"]').each(function() {
-        var id = this.id.split('-');
-        id.pop();
-        t[id.join('-')] = $(this).html();
-    });
+
 
 // sync
 var WikiSync = {};
