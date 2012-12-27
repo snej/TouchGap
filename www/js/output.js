@@ -1023,23 +1023,6 @@ var Mustache;
 
 });
 
-require.define("/www/js/config.js",function(require,module,exports,__dirname,__filename,process,global){
-
-var t = exports.t = {
-  "ok" : true
-};
-
-
-$('script[type="text/mustache"]').each(function() {
-    var id = this.id.split('-');
-    id.pop();
-    console.log(id);
-    t[id.join('-')] = $(this).html();
-});
-
-
-});
-
 require.define("/www/js/auth.js",function(require,module,exports,__dirname,__filename,process,global){exports.login = function(user, cb) {
   // do login
   // save local user
@@ -1071,6 +1054,28 @@ module.exports = route;
 
 });
 
+require.define("/www/js/config.js",function(require,module,exports,__dirname,__filename,process,global){
+module.exports = {
+  t : {},
+  dbUrl : ""
+
+}
+var t = exports.t = {
+  "ok" : true
+};
+
+exports.dbUrl =
+
+$('script[type="text/mustache"]').each(function() {
+    var id = this.id.split('-');
+    id.pop();
+    console.log(id);
+    t[id.join('-')] = $(this).html();
+});
+
+
+});
+
 require.define("/www/js/app.js",function(require,module,exports,__dirname,__filename,process,global){$(function() {
   var mustache = require('./mustache'),
     config = require('./config'),
@@ -1078,21 +1083,35 @@ require.define("/www/js/app.js",function(require,module,exports,__dirname,__file
     sync = require('./sync'),
     route = require('./route');
 
-    route("/login", function() {
-      $('#content').html(mustache.render(config.t.login));
-      $("#content form").submit(function(e) {
-        e.preventDefault();
-        var me = $("input[type=text]",this).val(),
-          pass = $("input[type=password]",this).val();
-        auth.login({user : me, pass: pass}, function(err, ok) {
-          if (err) throw err;
-          $.pathbinder.go("/home"); // triggers initial sync
-        });
-        return false;
+  function pd(e) {e.preventDefault();}
+
+  route("/login", function() {
+    $('#content').html(mustache.render(config.t.login));
+    $("#content form").submit(function(e) {
+      pd(e);
+      var me = $("input[type=text]",this).val(),
+        pass = $("input[type=password]",this).val();
+      auth.login({user : me, pass: pass}, function(err, ok) {
+        if (err) throw err;
+        $.pathbinder.go("/home"); // triggers initial sync
       });
     });
+  });
 
-    $.pathbinder.begin("/home")
+  route("/home", function() {
+    // $(this).html(mustache.render(config.t.home));
+
+    route("/home", function() {
+      coux.get([dbUrl,"_design","wiki","_view","title",
+          {descending:true, limit:1}], function(err, view) {
+            var path  = "/wiki/" + (view.rows[0] && view.rows[0].id);
+            console.log("redirect "+path);
+            $.pathbinder.go(path);
+        });
+    });
+  });
+
+  $.pathbinder.begin("/home");
 });
 
 
