@@ -1,6 +1,10 @@
 $(function() {
+  var config = require('./app/config'),
+
+
+
   var route = require('./route'),
-    config = require('./app/config'),
+
     auth = require('./app/auth'),
     // sync = require('./app/sync'),
     // register controllers

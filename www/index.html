@@ -17,15 +17,13 @@
         <section id="content">
         </section>
         <script type="text/javascript" src="cordova-2.2.0.js"></script>
-        <script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript" src="js/zepto.min.js"></script>
         <script type="text/javascript" src="js/coux.js"></script>
-        <script type="text/javascript" src="js/pathbinder.js"></script>
-        <script type="text/javascript" src="js/showdown.min.js"></script>
         <script type="text/javascript" src="js/output.js"></script>
         <!-- mustache templates -->
         <script type="text/mustache" id="sidebar-mu">
             <header>
-                <span>Wiki Notes</span>
+                <span>Chats</span>
                 <input class="new" type="submit" value="New"/>
                 <div class="clear"/>
             </header>
@@ -50,55 +48,25 @@
             <p>You only need to enter this once. If you choose a username
             that is not on the server yet, you get a new account. If you choose a name you chose on another device, you have to get the password right.</p>
         </script>
-        <script type="text/mustache" id="wiki-mu">
+        <script type="text/mustache" id="chat-mu">
+        <article>
             <header>
-                <input class="save" type="submit" value="Edit"/>
+                <input class="save" type="submit" value="Save"/>
                 <h2>
-                    {{#wiki_id}}
-                        {{title}}
-                    {{/wiki_id}}
-                    {{#page_id}}
-                    > {{page_id}}
-                    {{/page_id}}
+                    {{members}}
                 </h2>
             </header>
-            <div class="details">
-                <label for="tags">Tags:</label>
-                <span name="tags">{{tags}}</span>
-                <br/>
-                <label for="members">Members:</label>
-                <span name="members">{{members}}</span>
-            </div>
-            <article>{{{body}}}</article>
-        </script>
-        <script type="text/mustache" id="edit-wiki-mu">
-            <header class="grey">
-            <input class="save" type="submit" value="Save"/>
-                <h2>
-                    <input type="text" name="title" value="{{title}}"/>
-                </h2>
-            </header>
-            <form class="wiki">
-                <div class="details">
-                    <label for="tags">Tags:</label>
-                    <input size="50" name="tags" type="text" value="{{tags}}">
+            <section class="chat"></section>
+            <footer>
+                <form>
+                <label>Message:</label>
+                    <input type="hidden" name="chat_id" value="{{chat_id}}"></input>
+                    <input type="text" name="text" placeholder="your message here"></input>
                     <br/>
-                    <label for="members">Members:</label>
-                    <input size="50" name="members" type="text" value="{{members}}">
-                </div>
-                <textarea placeholder="Link to create new pages using WikiWords or [[double brackets]]." rows=20 cols=50>{{markdown}}</textarea>
-            </form>
-        </script>
-        <script type="text/mustache" id="edit-page-mu">
-            <header class="grey">
-            <input class="save" type="submit" value="Save"/>
-            <h2>
-                {{title}} > {{page_id}}
-            </h2>
-            </header>
-            <form class="wiki">
-                <textarea placeholder="Link to create new pages using WikiWords or [[double brackets]]." rows=20 cols=50>{{markdown}}</textarea>
-            </form>
+                    <input type="submit" value="Send"></input>
+                </form>
+            </footer>
+        </article>
         </script>
     </body>
 </html>
