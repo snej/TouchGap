@@ -73,11 +73,11 @@ function syncForUser(userDoc, cb) {
     },10000);
   }
 
-  console.log("syncForUser", userDoc.user);
+  // console.log("syncForUser", userDoc.user);
                             // silly cache
   coux.post(config.sync+'?r='+Math.random(), userDoc, function(err, channels) {
       if (err) console.log("ch err", err);
-      console.log("channels", channels);
+      console.log(["channels", channels]);
       if (cb) {cb(err, channels);}
       syncTheseChannels(userDoc, channels);
   });
