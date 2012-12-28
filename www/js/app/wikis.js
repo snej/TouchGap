@@ -53,11 +53,11 @@ module.exports = function(route) {
                   if (!err) {
                       drawPage(wiki, page);
                   } else {
-                      $.pathbinder.go("/edit/"+currentWiki+'/'+params.page);
+                      route.go("/edit/"+currentWiki+'/'+params.page);
                   }
               });
           } else {
-              $.pathbinder.go("/edit/"+currentWiki);
+              route.go("/edit/"+currentWiki);
           }
       });
   });

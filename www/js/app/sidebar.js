@@ -1,4 +1,5 @@
-var config = require("./config");
+var config = require("./config"),
+  mustache = require("mustache");
 module.exports = function(route) {
   return {
     draw : function(cb) {
@@ -7,7 +8,7 @@ module.exports = function(route) {
           view.rows.forEach(function(row) {
               row.path = '#/wiki/'+row.id;
           });
-          var st = $.mustache(config.t.sidebar, view);
+          var st = mustache(config.t.sidebar, view);
           $('#sidebar').html(st);
           $("#sidebar input.new").click(function() {
               route.go("#/edit/_new");

@@ -45,7 +45,7 @@ module.exports = function(route) {
               wiki.updated_at = new Date();
               coux.put([config.dbUrl,wiki._id], wiki, function(err, ok) {
                   console.log("saved", err, ok);
-                  if (!err) $.pathbinder.go("/wiki/"+wiki._id);
+                  if (!err) route.go("/wiki/"+wiki._id);
               });
           });
       }
@@ -86,14 +86,14 @@ module.exports = function(route) {
                       wiki.updated_at = page.updated_at = new Date();
                       coux.put([dbUrl,page._id], page, function(err, ok) {
                           console.log("saved", err, ok);
-                          $.pathbinder.go("/wiki/"+wiki._id+"/"+params.page);
+                          route.go("/wiki/"+wiki._id+"/"+params.page);
                           coux.put([dbUrl, wiki._id], wiki, function() {});
                       });
                   });
 
               });
           } else {
-              $.pathbinder.go("/edit/"+currentWiki);
+              route.go("/edit/"+currentWiki);
           }
       });
   });

@@ -45,7 +45,7 @@ function refreshPull() {
   })
 }
 function syncTheseChannels(user, channels) {
-  if (!channels && channels.length) return;
+  if (!(channels && channels.length)) return;
     pullRep = {
       source : "http://"+user.user+":"+user.pass+"@"+config.syncTarget,
       target : "wiki",

@@ -1,4 +1,3 @@
-
 var config = module.exports = {t : {}};
 
 config.dbHost = 'http://localhost.touchdb.';
@@ -11,12 +10,10 @@ if (location.protocol != "file:") {
   config.dbHost = location.origin;
 }
 
-config.dbUrl = config.dbHost + '/wiki'
-
+config.dbUrl = config.dbHost + '/wiki';
 
 $('script[type="text/mustache"]').each(function() {
     var id = this.id.split('-');
     id.pop();
     module.exports.t[id.join('-')] = $(this).html();
 });
-

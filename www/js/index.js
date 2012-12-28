@@ -102,7 +102,7 @@ var WikiApp = {};
         console.log("change", err, changes);
         var matches = window.location.toString().match(/^[^#]*#(.+)$/);
         if (matches && matches[1] && !/edit/.test(matches[1])) {
-            $.pathbinder.go(matches[1])
+            route.go(matches[1])
         }
     });
 
@@ -125,7 +125,7 @@ var WikiApp = {};
             var st = $.mustache(config.t.sidebar, view);
             $('#sidebar').html(st);
             $("#sidebar input.new").click(function() {
-                $.pathbinder.go("#/edit/_new");
+                route.go("#/edit/_new");
             })
             if (cb) {
                 cb(err, view);
@@ -148,7 +148,7 @@ var WikiApp = {};
         $('input.save').click(function() {
             var path = wiki._id;
             if (page) path += "/"+data.page_id;
-            $.pathbinder.go("/edit/"+path);
+            route.go("/edit/"+path);
         })
         if (cb) {cb()};
     };
@@ -166,7 +166,7 @@ var WikiApp = {};
       coux.get([dbUrl,"_design","wiki","_view","title",
           {descending:true, limit:1}], function(err, view) {
             var id = view.rows[0] && view.rows[0].id;
-            $.pathbinder.go("/wiki/"+id);
+            route.go("/wiki/"+id);
         });
     });
 
@@ -203,7 +203,7 @@ var WikiApp = {};
           if (!err) {
             saveLocalUser(localUser, function(err, ok) {
               LocalUserName = localUser.user;
-              $.pathbinder.go("/home");
+              route.go("/home");
             });
           } else {
             console.log("error syncing", err);
@@ -246,7 +246,7 @@ var WikiApp = {};
                 wiki.updated_at = new Date();
                 coux.put([dbUrl,wiki._id], wiki, function(err, ok) {
                     console.log("saved", err, ok);
-                    if (!err) $.pathbinder.go("/wiki/"+wiki._id);
+                    if (!err) route.go("/wiki/"+wiki._id);
                 });
             });
         }
@@ -294,14 +294,14 @@ var WikiApp = {};
                         wiki.updated_at = page.updated_at = new Date();
                         coux.put([dbUrl,page._id], page, function(err, ok) {
                             console.log("saved", err, ok);
-                            $.pathbinder.go("/wiki/"+wiki._id+"/"+params.page);
+                            route.go("/wiki/"+wiki._id+"/"+params.page);
                             coux.put([dbUrl, wiki._id], wiki, function() {});
                         });
                     });
 
                 });
             } else {
-                $.pathbinder.go("/edit/"+currentWiki);
+                route.go("/edit/"+currentWiki);
             }
         });
     });
@@ -320,12 +320,12 @@ var WikiApp = {};
       console.log("Starting App at "+dbUrl);
       getLocalUser(function(err, localUser) {
         if (err) {
-          $.pathbinder.go("/login");
+          route.go("/login");
         } else {
           LocalUserDoc = localUser;
           LocalUserName = localUser.user;
           syncForUser(LocalUserDoc);
-          $.pathbinder.go("/home");
+          route.go("/home");
         }
       });
     };
