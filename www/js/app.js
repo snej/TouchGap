@@ -1,6 +1,6 @@
 $(function() {
   var route = require('./route'),
-    // config = require('./app/config'),
+    config = require('./app/config'),
     auth = require('./app/auth'),
     // sync = require('./app/sync'),
     // register controllers
@@ -11,6 +11,16 @@ $(function() {
 
   home.ready();
   sidebar.draw();
+
+  coux.changes(config.dbUrl, function(err, changes) {
+      console.log("change", err, changes);
+      sidebar.draw();
+
+      var matches = window.location.toString().match(/^[^#]*#(.+)$/);
+      if (matches && matches[1] && !/edit/.test(matches[1])) {
+          route.go(matches[1])
+      }
+  });
 
 });
 
