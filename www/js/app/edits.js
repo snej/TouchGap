@@ -1,4 +1,4 @@
-var mustache = require("mustache"),
+var mu = require("mustache").render,
   auth = require("./auth"),
   config = require("./config");
 
@@ -22,7 +22,7 @@ module.exports = function(route) {
             withWiki(false, newWiki);
         } else {
             console.log("get wiki");
-            coux.get([dbUrl,params.id], withWiki);
+            coux.get([config.dbUrl,params.id], withWiki);
         }
       }
     });
@@ -32,7 +32,7 @@ module.exports = function(route) {
               wiki = newWiki;
           }
           console.log("edit form");
-          $('#content').html(mustache.render(config.t['edit-wiki'], wiki));
+          $('#content').html(mu(config.t['edit-wiki'], wiki));
           $('input.save').click(function() {
               $('#content form').submit();
           });
@@ -59,9 +59,9 @@ module.exports = function(route) {
   // edit any other page of a wiki
   route("/edit/:id/:page", function(e, params) {
       currentWiki = params.id;
-      coux.get([dbUrl,params.id], function(err, wiki) {
+      coux.get([config.dbUrl,params.id], function(err, wiki) {
           if (!err) {
-              coux.get([dbUrl,params.id+':'+params.page], function(err, page) {
+              coux.get([config.dbUrl,params.id+':'+params.page], function(err, page) {
                   if (err) {
                       page = {
                           _id : params.id+':'+params.page,
@@ -76,7 +76,7 @@ module.exports = function(route) {
                       wiki_id : params.id,
                       page_id : params.page
                   };
-                  $('#content').html($.mustache(config.t['edit-page'], data));
+                  $('#content').html(mu(config.t['edit-page'], data));
                   $('input.save').click(function() {
                       $('#content form').submit();
                   });
@@ -84,10 +84,10 @@ module.exports = function(route) {
                       e.preventDefault();
                       page.markdown = $("textarea", this).val();
                       wiki.updated_at = page.updated_at = new Date();
-                      coux.put([dbUrl,page._id], page, function(err, ok) {
+                      coux.put([config.dbUrl,page._id], page, function(err, ok) {
                           console.log("saved", err, ok);
                           route.go("/wiki/"+wiki._id+"/"+params.page);
-                          coux.put([dbUrl, wiki._id], wiki, function() {});
+                          coux.put([config.dbUrl, wiki._id], wiki, function() {});
                       });
                   });
 

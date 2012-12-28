@@ -10,6 +10,7 @@ $(function() {
     sidebar = require("./app/sidebar")(route);
 
   home.ready();
+  sidebar.draw();
 
 });
 

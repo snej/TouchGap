@@ -1,4 +1,4 @@
-var mustache = require("mustache"),
+var mu = require("mustache").render,
   wikiToHtml = require("./wikiwords").wikiToHtml,
 
   // wikiToHtml = require("./sync").wikiToHtml,
@@ -21,7 +21,7 @@ module.exports = function(route) {
           wiki_id : currentWiki,
           page_id : (page ? page._id.split(':').pop() : null)
       };
-      var st = mustache.render(config.t.wiki, data);
+      var st = mu(config.t.wiki, data);
       $('#content').html(st);
       $('input.save').click(function() {
           var path = wiki._id;
@@ -49,7 +49,7 @@ module.exports = function(route) {
       currentWiki = params.id;
       coux.get([config.dbUrl,params.id], function(err, wiki) {
           if (!err) {
-              coux.get([dbUrl,params.id+':'+params.page], function(err, page) {
+              coux.get([config.dbUrl,params.id+':'+params.page], function(err, page) {
                   if (!err) {
                       drawPage(wiki, page);
                   } else {

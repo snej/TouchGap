@@ -1,7 +1,7 @@
 var config = require('./config'),
   auth = require('./auth'),
   sync = require('./sync'),
-  mustache = require('mustache');
+  mu = require("mustache").render;
 
 module.exports = function(route) {
   route("/home", function() {
@@ -24,7 +24,7 @@ module.exports = function(route) {
       if (!no) {
         route.go("/home");
       } else {
-        $('#content').html(mustache.render(config.t.login));
+        $('#content').html(mu(config.t.login));
         $("#content form").submit(function(e) {
           e.preventDefault();
           var me = $("input[type=text]",this).val(),

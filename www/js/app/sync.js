@@ -35,13 +35,13 @@ function refreshSyncOnce(path, rep, cb) {
 function refreshPush() {
   var doSync = false ? refreshSyncDoc : refreshSyncOnce;
   doSync(pushPath, pushRep, function(err, ok) {
-    console.log("pushRep", err, ok)
+    // console.log("pushRep", err, ok)
   })
 }
 function refreshPull() {
   var doSync = false ? refreshSyncDoc : refreshSyncOnce;
   doSync(pullPath, pullRep, function(err, ok) {
-    console.log("pullRep", err, ok)
+    // console.log("pullRep", err, ok)
   })
 }
 function syncTheseChannels(user, channels) {
@@ -73,7 +73,7 @@ function syncForUser(userDoc, cb) {
     },10000);
   }
 
-  console.log("syncForUser", userDoc);
+  console.log("syncForUser", userDoc.user);
                             // silly cache
   coux.post(config.sync+'?r='+Math.random(), userDoc, function(err, channels) {
       if (err) console.log("ch err", err);
