@@ -12,11 +12,13 @@ var CouchbaseViews = "http://localhost:8092"
 var push = require("./push");
 push.go();
 
-var b = browserify({watch : true});
+var b = browserify({watch : true, debug : true});
 b.addEntry("./www/js/app.js");
 b.on('bundle', function() {
   var src = b.bundle();
-  if (!b.ok) return;
+  if (!b.ok) {
+    throw("bundle error")
+  }
   fs.writeFile("./www/js/output.js", src, function () {
     console.log(Buffer(src).length + ' bytes written to output.js');
   });

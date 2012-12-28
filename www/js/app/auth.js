@@ -1,17 +1,10 @@
-exports.login = function(user, cb) {
-  // do login
-  // save local user
-  cb("todo")
+var config = require("./config");
+
+exports.setUser = function(user, cb) {
+  coux.put([config.dbUrl, "_local/user"], user, cb);
 };
 
+exports.getUser = function(cb) {
+  coux([config.dbUrl, "_local/user"], cb);
+};
 
-// syncForUser(localUser, function(err, ok) {
-//   if (!err) {
-//     saveLocalUser(localUser, function(err, ok) {
-//       LocalUserName = localUser.user;
-//       $.pathbinder.go("/home");
-//     });
-//   } else {
-//     console.log("error syncing", err);
-//     console.log(err);}
-// });

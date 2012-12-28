@@ -122,7 +122,7 @@ var WikiApp = {};
             view.rows.forEach(function(row) {
                 row.path = '#/wiki/'+row.id;
             });
-            var st = $.mustache(t.sidebar, view);
+            var st = $.mustache(config.t.sidebar, view);
             $('#sidebar').html(st);
             $("#sidebar input.new").click(function() {
                 $.pathbinder.go("#/edit/_new");
@@ -219,7 +219,7 @@ var WikiApp = {};
 
     // edit the front page of a wiki
     route("/edit/:id", function(e, params) {
-        drawSidebar();
+        basecouch
         var newWiki = {
                 _id : params.id == "_new" ? (""+Math.random()).slice(2) : params.id,
                 created_at : new Date(),
@@ -266,7 +266,7 @@ var WikiApp = {};
     // edit any other page of a wiki
     route("/edit/:id/:page", function(e, params) {
         currentWiki = params.id;
-        drawSidebar();
+        basecouch
         coux.get([dbUrl,params.id], function(err, wiki) {
             if (!err) {
                 coux.get([dbUrl,params.id+':'+params.page], function(err, page) {
