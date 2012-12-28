@@ -11,7 +11,7 @@ module.exports = function(route) {
         route.go("/start");
       } else {
         newWiki = {
-          _id : params.id == "_new" ? (""+Math.random()).slice(2) : params.id,
+          _id : params.id == "_new" ? Math.random().toString(34).slice(2) : params.id,
           created_at : new Date(),
           members : user.user, // todo 'name'
           type : "wiki"

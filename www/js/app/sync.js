@@ -1,7 +1,6 @@
 var config = require("./config");
 
 
-
 var pullRep, pushRep,
   pullPath = [config.dbHost, "_replicator", "channel_pull"],
   pushPath = [config.dbHost, "_replicator", "channel_push"];
