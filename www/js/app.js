@@ -28,10 +28,28 @@ $(function() {
       "/chats" : chat.index
     };
 
-  // $(document.body).click(function() {
-  //   $(content).append('<li>** clicked</li>')
-  //   // return false;
-  // })
+  $(document.body).on("click","a",function(e) {
+    $(content).append('<li>** clicked</li>')
+    var target = $(e.currentTarget);
+    if (target.attr('href')) {
+      target.removeClass('good');
+    }
+
+    // return false;
+  })
+  $(document.body).on("touchstart", "a", function(e) {
+    var target = $(e.currentTarget);
+    if (target.attr('href')) {
+      target.addClass('good');
+    }
+  });
+  $(document.body).on("touchend",  "a", function(e) {
+    var target = $(e.currentTarget);
+    if (target.attr('href')) {
+      target.removeClass('good');
+    }
+  });
+
 
   var contentRouter = router(contentRoutes, content);
   // // var sidebarRouter = router(sidebarRoutes, sidebar);
