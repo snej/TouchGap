@@ -21,11 +21,11 @@ exports.index = function() {
 };
 
 
-exports.create = function() {
-  console.log("new chat", this)
+exports.create = function(params) {
+  console.log("new chat", this, params)
   auth.getUser(function(err, user) {
     if (err) {
-      location.hash = "#/reload";
+      location.hash = "/reload";
       return;
     };
     $("#content").html(config.t.newChat(user));
@@ -38,7 +38,7 @@ exports.create = function() {
       // db.post(doc, function(err, ok) {});
       coux.post(config.dbUrl, doc, function(err, ok) {
         console.log(err, ok);
-        location.hash = "#/chat/"+ok.id;
+        location.hash = "/chat/"+ok.id;
       });
       return false;
     });

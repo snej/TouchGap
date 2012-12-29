@@ -16,8 +16,8 @@ $(function() {
       "/login" : home.login,
       "/reload" : home.reload,
       "/" : home.start,
-      // "/chats/new" : chat.create
-      "/chat/:id" : chat.view
+      "/threads/new" : chat.create,
+      "/thread/:id" : chat.view
 
     },
     sidebar = $("#sidebar")[0],

@@ -6,9 +6,10 @@ module.exports = function(table, element, bubbles) {
     match(location.hash);
   });
   $(document.body).on("click", "a", function() {
+    var matched = match(this.href);
     // if bubbles is == false, the #/hash won't change, useful for
     // state that doesn't need to be linkable or in the history
-    if (match(this.href)) {
+    if (matched) {
       return bubbles;
     }
   });
@@ -25,19 +26,26 @@ module.exports = function(table, element, bubbles) {
 
 function matcherForTable(table, element) {
   var router = new routes.Router();
+
+  function bindFun(path, fun) {
+    console.log("bind path", path);
+    router.addRoute(path, function() {
+      return fun.apply(element, arguments);
+    }); // ensure this is the element
+  }
+
   for (var path in table) {
     if (table[path]) {
-      console.log("bind path", path);
-      router.addRoute(path, function() {
-        console.log("run", element, path, arguments, table[path])
-        table[path].apply(element, arguments);
-      }); // ensure this is the element
+      bindFun(path, table[path])
     }
   }
+
   return function(url) {
-    var path = url.slice(url.indexOf('#')),
-    console.log("try", path);
-    matched = router.match(path);
+    var path = url.slice(url.indexOf('#')+1),
+      matched = router.match(path);
+
+    console.log("match?", path, matched, matched && matched.fn);
+
     if (matched) {
       matched.fn(matched)
     }
