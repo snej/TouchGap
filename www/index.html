@@ -17,7 +17,7 @@
         <section id="content">
             <p>if you are new here, perhaps you should <a href="#/threads/new">make a new thread</a>.
                 it's more fun if you get a friend near you to install the app
-                and chat with you.</p>
+                and thread with you.</p>
         </section>
         <script type="text/javascript" src="cordova-2.2.0.js"></script>
         <script type="text/javascript" src="js/zepto.min.js"></script>
@@ -26,7 +26,7 @@
         <!-- mustache templates -->
         <script type="text/mustache" id="sidebar-mu">
             <header>
-                <span>Chats</span>
+                <span>Threads</span>
                 <input class="new" type="submit" value="New"/>
                 <div class="clear"/>
             </header>
@@ -55,7 +55,7 @@
         <script type="text/mustache" id="newChat-mu">
         <header>
             <h2>
-               {{user}}, invite friends to chat
+               {{user}}, invite friends to thread
             </h2>
         </header>
         <article>
@@ -71,7 +71,7 @@
             </form>
         </article>
         </script>
-        <script type="text/mustache" id="chat-mu">
+        <script type="text/mustache" id="thread-mu">
         <article>
             <header>
                 <input class="save" type="submit" value="Save"/>
@@ -79,11 +79,11 @@
                     {{members}}
                 </h2>
             </header>
-            <section class="chat"></section>
+            <section class="thread"></section>
             <footer>
                 <form>
                 <label>Message:</label>
-                    <input type="hidden" name="chat_id" value="{{chat_id}}"></input>
+                    <input type="hidden" name="thread_id" value="{{thread_id}}"></input>
                     <input type="text" name="text" placeholder="your message here"></input>
                     <br/>
                     <input type="submit" value="Send"></input>

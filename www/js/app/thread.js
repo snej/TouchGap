@@ -6,23 +6,23 @@ var auth = require("./auth"),
   jsonform = require("./jsonform");
 
 exports.view = function(id) {
-  console.log("view chat", id)
+  console.log("view thread", id)
   // db.get(id, function() {});
-  coux.get([config.dbUrl, id], function(err, chat) {
-    console.log("chat", chat)
+  coux.get([config.dbUrl, id], function(err, thread) {
+    console.log("thread", thread)
   });
 };
 
 exports.index = function() {
-  console.log("list chats")
-  coux.get([config.dbUrl,"_design","chat","_view","title"], function(err, view) {
+  console.log("list threads")
+  coux.get([config.dbUrl,"_design","thread","_view","title"], function(err, view) {
     console.log(err, view);
   });
 };
 
 
 exports.create = function(params) {
-  console.log("new chat", this, params)
+  console.log("new thread", this, params)
   auth.getUser(function(err, user) {
     if (err) {
       location.hash = "/reload";
@@ -33,12 +33,12 @@ exports.create = function(params) {
       e.preventDefault();
       var doc = jsonform(this);
       doc.created_at = doc.updated_at = new Date();
-      doc._id = doc.chat_id = Math.random().toString(20).slice(2);
-      doc.type = "chat";
+      doc._id = doc.thread_id = Math.random().toString(20).slice(2);
+      doc.type = "thread";
       // db.post(doc, function(err, ok) {});
       coux.post(config.dbUrl, doc, function(err, ok) {
         console.log(err, ok);
-        location.hash = "/chat/"+ok.id;
+        location.hash = "/thread/"+ok.id;
       });
       return false;
     });

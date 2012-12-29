@@ -1,7 +1,7 @@
 $(function() {
   var config = require('./app/config'),
     home = require("./app/home"),
-    chat = require("./app/chat"),
+    thread = require("./app/thread"),
 
     // libraries
     touchlink = require("./touchlink"),
@@ -16,13 +16,13 @@ $(function() {
       "/login" : home.login,
       "/reload" : home.reload,
       "/" : home.start,
-      "/threads/new" : chat.create,
-      "/thread/:id" : chat.view
+      "/threads/new" : thread.create,
+      "/thread/:id" : thread.view
 
     },
     sidebar = $("#sidebar")[0],
     sidebarRoutes = {
-      "/chats" : chat.index
+      "/threads" : thread.index
     };
 
   touchlink(sidebar);
