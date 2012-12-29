@@ -7,6 +7,32 @@ exports.reload = function() {
   location.hash="#/reloaded";
   location.reload()
 };
+exports.reloaded = function() {
+  location.hash="/ready";
+};
+
+exports.ready = function() {
+    auth.getUser(function(no, user) {
+      if (no) {
+        location.hash="/login";
+      } else {
+        sync.trigger(user, function(err, ok) {
+          if (err) {
+            console.log("sync err", err);
+            location.hash="/reset";
+          } else {
+            location.hash="/home";
+          }
+        });
+      }
+    });
+  }
+
+exports.home = function(){
+  mostRecentThread(function(err, thread) {
+    location.hash="/thread/"+thread._id;
+  });
+};
 
 // module.exports = function(route) {
 //   route("/home", function() {
@@ -43,24 +69,6 @@ exports.reload = function() {
 //     })
 //   });
 
-//   route("/start", ready);
-
-//   function ready() {
-//     auth.getUser(function(no, user) {
-//       if (no) {
-//         route.go("/login");
-//       } else {
-//         sync.trigger(user, function(err, ok) {
-//           if (err) {
-//             console.log("sync err", err);
-//             route.go("/reset");
-//           } else {
-//             route.begin("/home");
-//           }
-//         });
-//       }
-//     });
-//   }
 
 //   return {ready:ready};
 // };

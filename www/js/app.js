@@ -2,6 +2,7 @@ $(function() {
   var config = require('./app/config'),
     home = require("./app/home"),
     thread = require("./app/thread"),
+    // auth = require('./app/auth'),
 
     // libraries
     touchlink = require("./touchlink"),
@@ -15,7 +16,9 @@ $(function() {
     contentRoutes = {
       "/login" : home.login,
       "/reload" : home.reload,
-      "/" : home.start,
+      "/reloaded" : home.reloaded,
+      "/" : home.ready,
+      "/ready" : home.ready,
       "/threads/new" : thread.create,
       "/thread/:id" : thread.view
 
@@ -23,6 +26,7 @@ $(function() {
     sidebar = $("#sidebar")[0],
     sidebarRoutes = {
       "/threads" : thread.index
+      // "/users" : users.index
     };
 
   touchlink(sidebar);
@@ -33,7 +37,6 @@ $(function() {
 
 
 
-  //   auth = require('./app/auth'),
   //   // sync = require('./app/sync'),
   //   // register controllers
   //   home = require("./app/home")(route),
