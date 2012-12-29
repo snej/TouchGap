@@ -1,5 +1,4 @@
-var config = require("./config"),
-  mu = require("mustache").render;
+var config = require("./config");
 
 module.exports = function(route) {
   return {
@@ -11,10 +10,10 @@ module.exports = function(route) {
             row.path = '#/wiki/'+row.id;
           });
           console.log(view.rows)
-          var st = mu(config.t.sidebar, view);
+          var st = config.t.sidebar(view);
           $('#sidebar').html(st);
           $("#sidebar input.new").click(function() {
-            route.go("#/edit/_new");
+            route.go("#/threads/new");
           })
           if (cb) {
             cb(err, view);

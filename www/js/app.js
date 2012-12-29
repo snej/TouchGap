@@ -2,7 +2,7 @@ $(function() {
   var config = require('./app/config'),
     home = require("./app/home"),
     thread = require("./app/thread"),
-    // auth = require('./app/auth'),
+    auth = require('./app/auth'),
 
     // libraries
     touchlink = require("./touchlink"),
@@ -14,7 +14,7 @@ $(function() {
 
   var content = $("#content")[0],
     contentRoutes = {
-      "/login" : home.login,
+      "/login" : auth.login,
       "/reload" : home.reload,
       "/reloaded" : home.reloaded,
       "/" : home.ready,
