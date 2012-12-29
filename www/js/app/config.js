@@ -1,4 +1,5 @@
-var config = module.exports = {t : {}};
+var config = module.exports = {t : {}},
+  mu = require("mustache");
 
 config.dbHost = 'http://localhost.touchdb.';
 
@@ -15,5 +16,5 @@ config.dbUrl = config.dbHost + '/wiki';
 $('script[type="text/mustache"]').each(function() {
     var id = this.id.split('-');
     id.pop();
-    module.exports.t[id.join('-')] = $(this).html();
+    module.exports.t[id.join('-')] = mu.compile(this.innerHTML.replace(/^\s+|\s+$/g,''));
 });

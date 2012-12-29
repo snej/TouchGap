@@ -38,9 +38,7 @@ textarea {
     display: block;
    font-family: inherit;
    font-size: inherit;
-   width:100%;
-   padding:14px;
-   margin:0 -14px;
+   width:40%;
 }
 
 h2 {

@@ -2,60 +2,37 @@ $(function() {
   var config = require('./app/config'),
     home = require("./app/home"),
     chat = require("./app/chat"),
+
+    // libraries
+    touchlink = require("./touchlink"),
     fastclick = require("fastclick"),
-    router = require('director').Router;
+    router = require("./routes-element");
+    // router = require('director').Router;
 
   new fastclick.FastClick(document.body);
 
   var content = $("#content")[0],
     contentRoutes = {
       "/login" : home.login,
-      "/reload" : location.reload,
-      "/start" : home.start,
-      "/chat/:id" : chat.view,
-      "/" : function() {
-        $(content).append('<li>/</li>')
-      },
-      "/bar" : function() {
-        $(content).append('<li>/bar :/</li>')
-      },
-      "/ok" : function() {
-        $(content).append('<li>/ok :)</li>')
-      }
+      "/reload" : home.reload,
+      "/" : home.start,
+      // "/chats/new" : chat.create
+      "/chat/:id" : chat.view
+
     },
     sidebar = $("#sidebar")[0],
     sidebarRoutes = {
       "/chats" : chat.index
     };
 
-  $(document.body).on("click","a",function(e) {
-    $(content).append('<li>** clicked</li>')
-    var target = $(e.currentTarget);
-    if (target.attr('href')) {
-      target.removeClass('good');
-    }
-
-    // return false;
-  })
-  $(document.body).on("touchstart", "a", function(e) {
-    var target = $(e.currentTarget);
-    if (target.attr('href')) {
-      target.addClass('good');
-    }
-  });
-  $(document.body).on("touchend",  "a", function(e) {
-    var target = $(e.currentTarget);
-    if (target.attr('href')) {
-      target.removeClass('good');
-    }
-  });
-
+  touchlink(sidebar);
 
   var contentRouter = router(contentRoutes, content);
+  contentRouter.init();
+  console.log("contentRouter", contentRouter)
   // // var sidebarRouter = router(sidebarRoutes, sidebar);
-  // // var route = require('./route'),
 
-  contentRouter.init("/start");
+
 
   //   auth = require('./app/auth'),
   //   // sync = require('./app/sync'),

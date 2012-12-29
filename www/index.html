@@ -15,9 +15,9 @@
         <nav id="sidebar">
         </nav>
         <section id="content">
-            this is the text <a href="#/">link to index</a>
-            <div class="needsclick"><a class="myclass" href="#/bar">bar needsclick</a></div>
-            <a href="#/ok">ok here</a>
+            <p>if you are new here, perhaps you should <a href="#/chats/new">make a new chat</a>.
+                it's more fun if you get a friend near you to install the app
+                and chat with you.</p>
         </section>
         <script type="text/javascript" src="cordova-2.2.0.js"></script>
         <script type="text/javascript" src="js/zepto.min.js"></script>
@@ -50,6 +50,26 @@
             </form>
             <p>You only need to enter this once. If you choose a username
             that is not on the server yet, you get a new account. If you choose a name you chose on another device, you have to get the password right.</p>
+        </script>
+
+        <script type="text/mustache" id="newChat-mu">
+        <header>
+            <h2>
+               {{user}}, invite friends to chat
+            </h2>
+        </header>
+        <article>
+            <form><label>Members</label>
+            <input size="60" type="text" name="members" placeholder="@jchris @amysue"></input>
+
+            <br/>
+            <label>Optional Message</label>
+            <textarea name="message"></textarea>
+            <br/>
+            <label>Invite</label>
+            <input type="submit" value="Send"></input>
+            </form>
+        </article>
         </script>
         <script type="text/mustache" id="chat-mu">
         <article>

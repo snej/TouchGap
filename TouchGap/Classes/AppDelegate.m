@@ -66,13 +66,13 @@
 
     CouchTouchDBServer* server = [CouchTouchDBServer sharedInstance];
     if (server.error) [self failed: server.error];
-    self.database = [server databaseNamed: @"wiki"];  // db name must be lowercase!
+    self.database = [server databaseNamed: @"chat"];  // db name must be lowercase!
     NSError* error;
     if (![self.database ensureCreated: &error]) [self failed: error];
 
     NSURL* dburl = [TDURLProtocol HTTPURLForServerURL: database.URL];
 
-    CouchDesignDocument* design = [database designDocumentWithName: @"wiki"];
+    CouchDesignDocument* design = [database designDocumentWithName: @"chat"];
     [design defineViewNamed: @"title" mapBlock: MAPBLOCK({
         id title = [doc objectForKey: @"title"];
         id updated = [doc objectForKey: @"updated_at"];
