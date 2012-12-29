@@ -5,11 +5,12 @@ var auth = require("./auth"),
 
   jsonform = require("./jsonform");
 
-exports.view = function(id) {
-  console.log("view thread", id)
+exports.view = function(params) {
+  var elem = $(this);
   // db.get(id, function() {});
-  coux.get([config.dbUrl, id], function(err, thread) {
+  coux.get([config.dbUrl, params.id], function(err, thread) {
     console.log("thread", thread)
+    elem.html(config.t.viewThread(thread));
   });
 };
 
@@ -23,19 +24,22 @@ exports.index = function() {
 
 exports.create = function(params) {
   console.log("new thread", this, params)
+  var elem = $(this);
+
   auth.getUser(function(err, user) {
     if (err) {
       location.hash = "/reload";
       return;
     };
-    $("#content").html(config.t.newChat(user));
-    $("#content form").submit(function(e) {
+    elem.html(config.t.newThread(user));
+    elem.find("form").submit(function(e) {
       e.preventDefault();
       var doc = jsonform(this);
+      doc.owner_id = user.user; // todo rename
       doc.created_at = doc.updated_at = new Date();
       doc._id = doc.thread_id = Math.random().toString(20).slice(2);
       doc.type = "thread";
-      // db.post(doc, function(err, ok) {});
+      // db.post(doc, function(err, ok) {}); todo
       coux.post(config.dbUrl, doc, function(err, ok) {
         console.log(err, ok);
         location.hash = "/thread/"+ok.id;

@@ -29,7 +29,6 @@ $(function() {
 
   var contentRouter = router(contentRoutes, content);
   contentRouter.init();
-  console.log("contentRouter", contentRouter)
   // // var sidebarRouter = router(sidebarRoutes, sidebar);
 
 

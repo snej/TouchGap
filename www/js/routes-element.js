@@ -44,10 +44,10 @@ function matcherForTable(table, element) {
     var path = url.slice(url.indexOf('#')+1),
       matched = router.match(path);
 
-    console.log("match?", path, matched, matched && matched.fn);
+    console.log("match?", path, matched, matched && matched.route);
 
     if (matched) {
-      matched.fn(matched)
+      matched.fn(matched.params, matched.splats)
     }
     return matched;
   }
