@@ -11,7 +11,7 @@ if (location.protocol != "file:") {
   config.dbHost = location.origin;
 }
 
-config.dbUrl = config.dbHost + '/wiki';
+config.dbUrl = config.dbHost + '/threads';
 
 $('script[type="text/mustache"]').each(function() {
     var id = this.id.split('-');
