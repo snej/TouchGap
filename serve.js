@@ -61,6 +61,9 @@ function handleChannelsRequest(req, res) {
           console.log("channels"+channelIds);
           baseCouchData.channels = channelIds;
           coux([baseCouchAuth,data.user], function(err, existingUserDoc) {
+            if (err) {
+              return console.log("err",err)
+            }
             console.log("get", err, existingUserDoc)
             if (err && existingUserDoc.statusCode == 404) {
               // we can create a new user with this password
@@ -116,7 +119,7 @@ var app = http.createServer(function(req, res){
   var test
   var path = url.parse(req.url).pathname;
   console.log("GET", path)
-  if (/^\/(wiki|_replicate)/.test(path)) {
+  if (/^\/(threads|_replicate)/.test(path)) {
     var proxy = http.createClient(5984, 'localhost')
     var proxyRequest = proxy.request(req.method, req.url, req.headers);
     proxyRequest.on('response', function (proxyResponse) {

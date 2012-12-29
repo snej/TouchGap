@@ -8,7 +8,7 @@ exports.reload = function() {
   location.reload()
 };
 exports.reloaded = function() {
-  location.hash="/ready";
+  location.hash="/";
 };
 
 exports.ready = function() {
@@ -21,18 +21,18 @@ exports.ready = function() {
             console.log("sync err", err);
             location.hash="/reset";
           } else {
-            location.hash="/home";
+            location.hash="/";
           }
         });
       }
     });
   }
 
-exports.home = function(){
-  mostRecentThread(function(err, thread) {
-    location.hash="/thread/"+thread._id;
-  });
-};
+// exports.home = function(){
+//   mostRecentThread(function(err, thread) {
+//     location.hash="/thread/"+thread._id;
+//   });
+// };
 
 // module.exports = function(route) {
 //   route("/home", function() {
@@ -50,24 +50,25 @@ exports.home = function(){
 //     });
 //   });
 
-//   route("/login", function() {
-//     auth.getUser(function(no, user) {
-//       if (!no) {
-//         route.go("/home");
-//       } else {
-//         $('#content').html(mu(config.t.login));
-//         $("#content form").submit(function(e) {
-//           e.preventDefault();
-//           var me = $("input[type=text]",this).val(),
-//             pass = $("input[type=password]",this).val();
-//           auth.setUser({user : me, pass: pass}, function(err, ok) {
-//             if (err) throw err;
-//             ready(); // triggers initial sync
-//           });
-//         });
-//       }
-//     })
-//   });
+  exports.login = function() {
+    auth.getUser(function(no, user) {
+      if (!no) {
+        location.hash = "/";
+      } else {
+        $('#content').html(config.t.login({}));
+        $("#content form").submit(function(e) {
+          e.preventDefault();
+          var me = $("input[type=text]",this).val(),
+            pass = $("input[type=password]",this).val();
+          auth.setUser({user : me, pass: pass}, function(err, ok) {
+            // if (err) throw err;
+            // ready(); // triggers initial sync
+            location.hash = "/"
+          });
+        });
+      }
+    })
+  };
 
 
 //   return {ready:ready};

@@ -57,7 +57,7 @@ h2 {
 
 #sidebar {
     float:left;
-    width: 30%;
+    width: 20%;
     /*height: 1000px;*/
     background-image: linear-gradient(        right bottom, rgb(238,238,238) 0%, rgb(250,250,250) 75%, rgb(255,255,255) 100%);
     background-image: -moz-linear-gradient(   right bottom, rgb(238,238,238) 0%, rgb(250,250,250) 75%, rgb(255,255,255) 100%);
@@ -88,7 +88,7 @@ h2 {
 
 #content {
     float:right;
-    width: 70%
+    width: 80%
 }
 
 #content .details {

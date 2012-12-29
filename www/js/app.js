@@ -18,7 +18,7 @@ $(function() {
       "/reload" : home.reload,
       "/reloaded" : home.reloaded,
       "/" : home.ready,
-      "/ready" : home.ready,
+      // "/ready" : home.ready,
       "/threads/new" : thread.create,
       "/thread/:id" : thread.view
 
@@ -33,8 +33,8 @@ $(function() {
 
   var contentRouter = router(contentRoutes, content);
   contentRouter.init();
-  // // var sidebarRouter = router(sidebarRoutes, sidebar);
-
+  var sidebarRouter = router(sidebarRoutes, sidebar);
+  sidebarRouter.go("/threads");
 
 
   //   // sync = require('./app/sync'),

@@ -73,10 +73,10 @@
     NSURL* dburl = [TDURLProtocol HTTPURLForServerURL: database.URL];
 
     CouchDesignDocument* design = [database designDocumentWithName: @"threads"];
-    [design defineViewNamed: @"title" mapBlock: MAPBLOCK({
-        id title = [doc objectForKey: @"title"];
+    [design defineViewNamed: @"updated" mapBlock: MAPBLOCK({
+        id members = [doc objectForKey: @"members"];
         id updated = [doc objectForKey: @"updated_at"];
-        if (title && updated) emit(updated, title);
+        if (members && updated) emit(updated, members);
     }) version: @"1.1"];
 
     NSLog(@"TouchDB url = %@", dburl);

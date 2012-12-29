@@ -25,7 +25,7 @@
         <script type="text/javascript" src="js/coux.js"></script>
         <script type="text/javascript" src="js/output.js"></script>
         <!-- mustache templates -->
-        <script type="text/mustache" id="sidebar-mu">
+        <script type="text/mustache" id="threadsIndex-mu">
             <header>
                 <span>Threads</span>
                 <input class="new" type="submit" value="New"/>
@@ -33,7 +33,7 @@
             </header>
             <ul>
             {{#rows}}
-                <li><a href="{{path}}">{{value}}</a></li>
+                <li><a href="#{{path}}">{{value}}</a></li>
             {{/rows}}
             </ul>
         </script>
@@ -64,8 +64,8 @@
             <input size="60" type="text" name="members" placeholder="@jchris @amysue"></input>
 
             <br/>
-            <label>Optional Message</label>
-            <textarea name="message"></textarea>
+            <label>Optional Topic Message</label>
+            <textarea name="topic"></textarea>
             <br/>
             <label>Invite</label>
             <input type="submit" value="Send"></input>
@@ -75,18 +75,30 @@
         <script type="text/mustache" id="viewThread-mu">
         <article>
             <header>
-                <h2>
-                    {{owner_id}} {{members}}
-                </h2>
-            </header>
-            <br>
-            <section class="thread"></section>
-            <footer>
+                <label>Owner:</label>
+                <h2>{{owner_id}}</h2>
+                {{#topic}}
+                <label>Topic:</label>
+                <p>{{topic}}</p>
+                {{/topic}}
+                <label>Members:</label>
+                <h3>{{members}}</h3>
                 <form>
                 <label>Message:</label>
-                    <input type="text" size=80 name="text" placeholder="your message here"></input>
+                    <input type="text" size=40 name="text" placeholder="your message here"></input>
                     <input type="submit" value="Send"></input>
                 </form>
+            </header>
+            <br>
+            <section class="thread">
+            <ul>
+            {{#rows}}
+                <li>{{#value}}{{author}}: {{text}}{{/value}}</li>
+            {{/rows}}
+            </ul>
+            </section>
+            <footer>
+
             </footer>
         </article>
         </script>

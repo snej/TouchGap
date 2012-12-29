@@ -6,7 +6,7 @@ module.exports = function(route) {
     draw : function(cb) {
       coux.get([config.dbUrl,"_design","wiki","_view","title",
         {reduce:false, descending:true, limit:100}], function(err, view) {
-          if (err) throw(err);
+          if (err) {console.log(err); return;}
           view.rows.forEach(function(row) {
             row.path = '#/wiki/'+row.id;
           });
