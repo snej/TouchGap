@@ -17,10 +17,6 @@ function getMessagesView(id, cb) {
   });
 }
 
-function drawView() {
-
-}
-
 exports.view = function(params) {
   var elem = $(this);
   auth.getUser(function(err, user) {
@@ -31,7 +27,7 @@ exports.view = function(params) {
 
     // db.get(id, function() {});
     coux.get([config.dbUrl, params.id], function(err, thread) {
-      if(err){return location.hash="/reload";}
+      if(err){return location.hash="/error";}
       console.log("thread", thread);
 
       function formSubmit(e) {
@@ -53,13 +49,17 @@ exports.view = function(params) {
 
       // load view on changes
       function drawMe() {
-        getMessagesView(thread._id, function(err, view) {
-          console.log("messages",err, view);
-          if(err){return location.hash="/reload";}
-          thread.rows = view.rows;
-          elem.html(config.t.viewThread(thread));
-          elem.find("form").submit(formSubmit);
-        });
+        if (location.hash == "#/thread/"+thread._id) {
+          getMessagesView(thread._id, function(err, view) {
+            console.log("messages",err, view);
+            if(err){return location.hash="/reload";}
+            thread.rows = view.rows;
+            elem.html(config.t.viewThread(thread));
+            elem.find("form").submit(formSubmit);
+          });
+        } else {
+          console.log("inactive draw for "+thread._id)
+        }
       }
 
       coux.changes(config.dbUrl, drawMe);

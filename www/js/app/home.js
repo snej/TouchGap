@@ -5,7 +5,7 @@ var config = require('./config'),
 
 exports.reload = function() {
   location.hash="#/reloaded";
-  location.reload()
+  // location.reload()
 };
 exports.reloaded = function() {
   location.hash="/";

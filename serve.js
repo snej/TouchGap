@@ -5,7 +5,8 @@ var coux = require('coux');
 var fs = require('fs');
 var browserify = require('browserify');
 
-var baseCouch = "http://localhost:4984";
+var baseCouchHost = "localhost:4984",
+    baseCouch = "http://"+baseCouchHost;
 var baseCouchAuth = "http://localhost:4985";
 var CouchbaseViews = "http://localhost:8092"
 
@@ -25,7 +26,7 @@ b.on('bundle', function() {
 })
 b.emit("bundle");
 
-coux.put("http://localhost:4985/GUEST", {
+coux.put(baseCouchAuth+"/GUEST", {
   name: "GUEST", password : "GUEST",
   channels : []
 }, function(err, ok) {
@@ -45,8 +46,11 @@ function handleChannelsRequest(req, res) {
           name : data.user,
           password : data.pass
         };
+
+        // coux("http://"+data.user+":"+data.pass+"@"+baseCouchHost)
+
       // find channels with this user id:
-      coux([CouchbaseViews+"/basecouch/_design/wiki/_view/by_members",
+      coux([CouchbaseViews+"/basecouch/_design/threads/_view/by_members",
           {stale:false,group:true,connection_timeout:60000,
             start_key : [data.user], end_key : [data.user, {}]}],
         function(err, view) {
@@ -62,7 +66,8 @@ function handleChannelsRequest(req, res) {
           baseCouchData.channels = channelIds;
           coux([baseCouchAuth,data.user], function(err, existingUserDoc) {
             if (err) {
-              return console.log("err",err)
+
+              // return console.log("err",err)
             }
             console.log("get", err, existingUserDoc)
             if (err && existingUserDoc.statusCode == 404) {
@@ -79,7 +84,15 @@ function handleChannelsRequest(req, res) {
               // update the existing user with the new channels
               coux.put([baseCouchAuth,data.user], existingUserDoc, function(err, ok) {
                 console.log("put existing user", err, existingUserDoc, ok);
-                res.end(JSON.stringify(existingUserDoc.channels));
+                // todo security use url parse
+                coux("http://"+data.user+":"+data.pass+"@"+baseCouchHost, function(err, ok) {
+                  console.log("authed", err, ok);
+                  if (err) {
+                    res.end(JSON.stringify(err));
+                  } else {
+                    res.end(JSON.stringify(existingUserDoc.channels));
+                  }
+                });
               });
             }
           });

@@ -4,21 +4,23 @@ var couchapp = require("couchapp"),
 
 
 var designUrl = "http://animal.local:4984/basecouch/_design/channels";
-var bucketDesignUrl = "http://animal.local:8091/couchBase/basecouch/_design/wiki";
+var bucketDesignUrl = "http://animal.local:8091/couchBase/basecouch/_design/threads";
 
 function syncFun(doc) {
-	if (doc.wiki_id) {
-		sync(doc.wiki_id);
+  var ch = doc.thread_id || doc.wiki_id;
+	if (ch) {
+		sync(ch);
 	}
 }
 
 var ByMembersBucketView = function (doc, meta) {
-  var i, ms;
-  if (doc.wiki_id && doc.members) {
+  var i, ms, ch = doc.thread_id;// || doc.wiki_id;
+  if (ch && doc.members) {
     ms = doc.members.split(" ");
     for (i = ms.length - 1; i >= 0; i--) {
-      if (ms[i]) emit([ms[i], doc.wiki_id],doc.title);
+      if (ms[i]) emit([ms[i], ch], doc.title);
     }
+    if (doc.owner_id) {emit([doc.owner_id, ch], doc.title);}
   }
 }
 
@@ -28,13 +30,15 @@ function doPushBucketView() {
       "by_members" : {reduce : "_count", map : ByMembersBucketView}
     }
   };
-  ddoc._id = "_design/wiki";
+  ddoc._id = "_design/threads";
 
   couchapp.createApp(ddoc, bucketDesignUrl, function(app) {
       app.push(console.log)
   });
 };
 
+// basecouch sync function
+// todo : validation function
 function doPushApp() {
 	var ddoc = {
 		channelmap : syncFun

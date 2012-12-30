@@ -76,9 +76,23 @@
     [design defineViewNamed: @"updated" mapBlock: MAPBLOCK({
         id members = [doc objectForKey: @"members"];
         id updated = [doc objectForKey: @"updated_at"];
-        if (members && updated) emit(updated, members);
+        if (members && updated) {
+            emit(updated, members);
+        }
     }) version: @"1.1"];
 
+    [design defineViewNamed: @"messages" mapBlock: MAPBLOCK({
+        id thread_id = [doc objectForKey: @"thread_id"];
+        id chat_seq = [doc objectForKey: @"seq"];
+        id updated_at = [doc objectForKey: @"updated_at"];
+        id author = [doc objectForKey: @"author_id"];
+        id text = [doc objectForKey: @"text"];
+        if (thread_id && chat_seq && updated_at && author) {
+            emit([NSArray arrayWithObjects: thread_id, chat_seq, updated_at, nil],
+                 [NSDictionary dictionaryWithObjectsAndKeys:text, @"text", author, @"author", nil]);
+        }
+    }) version: @"1.1"];
+    
     NSLog(@"TouchDB url = %@", dburl);
 
     /* PhoneGap initialization */
