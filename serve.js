@@ -132,7 +132,7 @@ var app = http.createServer(function(req, res){
   var test
   var path = url.parse(req.url).pathname;
   console.log("GET", path)
-  if (/^\/(threads|_replicate)/.test(path)) {
+  if (/^\/(threads|_replicate|_replicator)/.test(path)) {
     var proxy = http.createClient(5984, 'localhost')
     var proxyRequest = proxy.request(req.method, req.url, req.headers);
     proxyRequest.on('response', function (proxyResponse) {

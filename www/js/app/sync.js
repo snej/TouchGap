@@ -14,7 +14,7 @@ function refreshSyncDoc(path, rep, cb) {
     } else {
       // delete it and make a new doc
       var revpath = path.concat({rev:ok._rev})
-      console.log("deleting revpath", revpath);
+      console.log("deleting revpath", revpath, rep);
       coux.del(revpath, function(err, ok) {
         if (err) {
           console.log("couldn't delete", err, revpath)
@@ -34,20 +34,20 @@ function refreshSyncOnce(path, rep, cb) {
 function refreshPush() {
   var doSync = false ? refreshSyncDoc : refreshSyncOnce;
   doSync(pushPath, pushRep, function(err, ok) {
-    // console.log("pushRep", err, ok)
+    console.log("pushRep", err, ok)
   })
 }
 function refreshPull() {
   var doSync = false ? refreshSyncDoc : refreshSyncOnce;
   doSync(pullPath, pullRep, function(err, ok) {
-    // console.log("pullRep", err, ok)
+    console.log("pullRep", err, ok)
   })
 }
 function syncTheseChannels(user, channels) {
   if (!(channels && channels.length)) return;
     pullRep = {
       source : "http://"+user.user+":"+user.pass+"@"+config.syncTarget,
-      target : "wiki",
+      target : "threads",
       continuous : true,
       filter : "basecouch/bychannel",
       query_params : {
@@ -56,7 +56,7 @@ function syncTheseChannels(user, channels) {
     };
     pushRep = {
         target : "http://"+user.user+":"+user.pass+"@"+config.syncTarget,
-        source : "wiki",
+        source : "threads",
         continuous : true
     };
     refreshPush()
@@ -78,6 +78,7 @@ function syncForUser(userDoc, cb) {
       if (err) console.log("ch err", err);
       console.log(["channels", channels]);
       if (cb) {cb(err, channels);}
+      // if the channels have changed from the old channels, run this
       syncTheseChannels(userDoc, channels);
   });
 };

@@ -17,6 +17,11 @@ function getMessagesView(id, cb) {
   });
 }
 
+// var e = errh(function(err){
+//   console.err(err);
+//   location.hash = "/reload";
+// });
+
 exports.view = function(params) {
   var elem = $(this);
   auth.getUser(function(err, user) {

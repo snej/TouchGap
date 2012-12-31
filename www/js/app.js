@@ -3,7 +3,7 @@ $(function() {
     home = require("./app/home"),
     thread = require("./app/thread"),
     auth = require('./app/auth'),
-
+    sync = require('./app/sync'),
     // libraries
     touchlink = require("./touchlink"),
     fastclick = require("fastclick"),
@@ -29,12 +29,35 @@ $(function() {
       // "/users" : users.index
     };
 
-  touchlink(sidebar);
+    function initSyncOrLogin () {
+      auth.getUser(function(no, user) {
+        if (no) {
+          location.hash="/login";
+        } else {
+          sync.trigger(user, function(err, ok) {
+            if (err) {
+              console.log("sync err", err);
+              location.hash="/reset";
+            } else {
+              location.hash="/";
+            }
+          });
+        }
+      });
+    }
 
-  var contentRouter = router(contentRoutes, content);
-  contentRouter.init();
-  var sidebarRouter = router(sidebarRoutes, sidebar);
-  sidebarRouter.go("/threads");
+  // start the sync
+  function appInit() {
+    var contentRouter = router(contentRoutes, content);
+    contentRouter.init();
+    var sidebarRouter = router(sidebarRoutes, sidebar);
+    sidebarRouter.go("/threads");
+    touchlink(sidebar);
+
+    initSyncOrLogin();
+  }
+
+  appInit();
 
 });
 
