@@ -58,14 +58,15 @@ exports.view = function(params) {
           getMessagesView(thread._id, function(err, view) {
             console.log("messages",err, view);
             if(err){return location.hash="/reload";}
-            thread.rows = view.rows;
-            elem.html(config.t.viewThread(thread));
-            elem.find("form").submit(formSubmit);
+            elem.find("section.thread").html(config.t.listMessages(view));
           });
         } else {
           console.log("inactive draw for "+thread._id)
         }
       }
+
+      elem.html(config.t.showThread(thread));
+      elem.find("form").submit(formSubmit);
 
       coux.changes(config.dbUrl, drawMe);
 
@@ -75,7 +76,7 @@ exports.view = function(params) {
 };
 
 // sidebar
-exports.index = function() {
+exports.index = function(params) {
   var elem = $(this);
   // console.log("list threads")
   // console.log("coux",[config.dbUrl,"_design","thread","_view","updated"].join('/'))
@@ -84,14 +85,14 @@ exports.index = function() {
       row.path = "/thread/"+row.id;
     });
     // console.log(err, view);
-    elem.html(config.t.threadsIndex(view))
+    elem.html(config.t.threadsSidebar(view))
     elem.find(".new").click(function(){
       location.hash = "/threads/new";
     });
     elem.find('li a').click(function() {
       elem.find('ul li').removeClass("active");
-      elem.parents("li").addClass("active");
-    })
+      $(this).parents("li").addClass("active");
+    });
   });
 };
 

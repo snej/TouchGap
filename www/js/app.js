@@ -25,8 +25,8 @@ $(function() {
     },
     sidebar = $("#sidebar")[0],
     sidebarRoutes = {
-      "/threads" : thread.index
-      // "/users" : users.index
+      "/threads" : thread.index,
+      "/thread/:id" : thread.view
     };
 
     function initSyncOrLogin () {
@@ -53,7 +53,6 @@ $(function() {
     var sidebarRouter = router(sidebarRoutes, sidebar);
     sidebarRouter.go("/threads");
     touchlink(sidebar);
-
     initSyncOrLogin();
   }
 

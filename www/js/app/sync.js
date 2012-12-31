@@ -2,8 +2,8 @@ var config = require("./config");
 
 
 var pullRep, pushRep,
-  pullPath = [config.dbHost, "_replicator", "channel_pull"],
-  pushPath = [config.dbHost, "_replicator", "channel_push"];
+  pullPath = [config.dbHost, "_replicator", "channel_pull-"+config.dbName],
+  pushPath = [config.dbHost, "_replicator", "channel_push-"+config.dbName];
 
 function refreshSyncDoc(path, rep, cb) {
   coux.get(path, function(err, ok) {
@@ -47,7 +47,7 @@ function syncTheseChannels(user, channels) {
   if (!(channels && channels.length)) return;
     pullRep = {
       source : "http://"+user.user+":"+user.pass+"@"+config.syncTarget,
-      target : "threads",
+      target : config.dbName,
       continuous : true,
       filter : "basecouch/bychannel",
       query_params : {
@@ -56,7 +56,7 @@ function syncTheseChannels(user, channels) {
     };
     pushRep = {
         target : "http://"+user.user+":"+user.pass+"@"+config.syncTarget,
-        source : "threads",
+        source : config.dbName,
         continuous : true
     };
     refreshPush()
@@ -74,7 +74,7 @@ function syncForUser(userDoc, cb) {
 
   // console.log("syncForUser", userDoc.user);
                             // silly cache
-  coux.post(config.sync+'?r='+Math.random(), userDoc, function(err, channels) {
+  coux.post(config.channelServer+'?r='+Math.random(), userDoc, function(err, channels) {
       if (err) console.log("ch err", err);
       console.log(["channels", channels]);
       if (cb) {cb(err, channels);}

@@ -70,14 +70,13 @@ function handleChannelsRequest(req, res) {
               // return console.log("err",err)
             }
             console.log("get", err, existingUserDoc)
-            if (err && existingUserDoc.statusCode == 404) {
+            if (err && existingUserDoc && existingUserDoc.statusCode == 404) {
               // we can create a new user with this password
               coux.put([baseCouchAuth,data.user], baseCouchData, function(err, ok) {
                 console.log("put new user", err, baseCouchData, ok);
                 res.end(JSON.stringify(baseCouchData.channels));
               });
             } else if (!err) {
-              // todo we should validate the password
               existingUserDoc.channels = baseCouchData.channels;
 /////////// here we need to update the existingUserDoc?
 
@@ -94,6 +93,8 @@ function handleChannelsRequest(req, res) {
                   }
                 });
               });
+            } else {
+              res.end(JSON.stringify(err));
             }
           });
         });
@@ -132,7 +133,7 @@ var app = http.createServer(function(req, res){
   var test
   var path = url.parse(req.url).pathname;
   console.log("GET", path)
-  if (/^\/(threads|_replicate|_replicator)/.test(path)) {
+  if (/^\/(thc|threads|_replicate|_replicator)/.test(path)) {
     var proxy = http.createClient(5984, 'localhost')
     var proxyRequest = proxy.request(req.method, req.url, req.headers);
     proxyRequest.on('response', function (proxyResponse) {
