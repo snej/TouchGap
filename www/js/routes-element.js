@@ -15,11 +15,17 @@ module.exports = function(table, element, bubbles) {
   });
   return {
     init : function(path) {
-      console.log("init", location.hash||path);
-      match(location.hash||path||"/");
+      console.log("init", location.hash, path);
+      var loc = location.hash.slice(location.hash.indexOf('#')+1),
+        matched = match.test(loc);
+      if (matched) {
+        return match(loc);
+      } else {
+        return match(path||"/");
+      }
     },
     go : function(path) { // for non-linked state on widgets
-      match(path);
+      return match(path);
     }
   }
 };
@@ -40,17 +46,20 @@ function matcherForTable(table, element) {
     }
   }
 
-  return function(url) {
+  var matchFun = function(url) {
     var path = url.slice(url.indexOf('#')+1),
       matched = router.match(path);
-
     console.log("match?", path, matched, matched && matched.route);
-
     if (matched) {
       matched.fn(matched.params, matched.splats)
     }
     return matched;
-  }
+  };
+  matchFun.test = function(url) {
+    var path = url.slice(url.indexOf('#')+1);
+    return router.match(path);
+  };
+  return matchFun;
 };
 
 

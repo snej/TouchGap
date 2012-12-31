@@ -51,7 +51,7 @@ $(function() {
     var contentRouter = router(contentRoutes, content);
     contentRouter.init();
     var sidebarRouter = router(sidebarRoutes, sidebar);
-    sidebarRouter.go("/threads");
+    sidebarRouter.init("/threads");
     touchlink(sidebar);
     initSyncOrLogin();
   }

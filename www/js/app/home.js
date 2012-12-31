@@ -11,21 +11,9 @@ exports.reloaded = function() {
   location.hash="/";
 };
 
-exports.ready = function() {
-    auth.getUser(function(no, user) {
-      if (no) {
-        location.hash="/login";
-      } else {
-        sync.trigger(user, function(err, ok) {
-          if (err) {
-            console.log("sync err", err);
-            location.hash="/reset";
-          } else {
-            location.hash="/";
-          }
-        });
-      }
-    });
-  }
+exports.index = function() {
+  // render index content html
+
+}
 
 

@@ -9,7 +9,6 @@ function getMessagesView(id, cb) {
   coux.get([config.dbUrl,"_design","threads","_view",
     "messages",{descending:true,
       startkey : [id,{}], endkey : [id]}], function(err, view) {
-
     if (!err && view.rows[0]) {
       last_seq = view.rows[0].key[1];
     }
@@ -30,27 +29,36 @@ exports.view = function(params) {
       return;
     };
 
+    function formSubmit(e) {
+      e.preventDefault();
+      var form = this, doc = jsonform(form);
+      doc.author_id = user.user; // todo rename
+      doc.created_at = doc.updated_at = new Date();
+      doc.thread_id = $("section.thread ul").attr("data-thread_id");
+      doc.seq = last_seq++;
+      doc.type = "message";
+      // emit([doc.thread_id, doc.seq, doc.updated_at], doc.text);
+      console.log("new message", doc);
+      coux.post(config.dbUrl, doc, function(err, ok){
+        if (err) {return console.log(err);}
+        var input = $(form).find("[name=text]");
+        if (input.val() != doc.text) {
+          console.log("you've been working", input.val());
+        } else {
+          input.val('');
+        }
+      });
+    }
+
     // db.get(id, function() {});
     coux.get([config.dbUrl, params.id], function(err, thread) {
       if(err){return location.hash="/error";}
       console.log("thread", thread);
 
-      function formSubmit(e) {
-        e.preventDefault();
-        var form = this, doc = jsonform(form);
-        doc.author_id = user.user; // todo rename
-        doc.created_at = doc.updated_at = new Date();
-        doc.thread_id = thread._id;
-        doc.seq = last_seq++;
-        doc.type = "message";
-        // emit([doc.thread_id, doc.seq, doc.updated_at], doc.text);
-        console.log("message form", doc);
-        coux.post(config.dbUrl, doc, function(err, ok){
-          if (err) {return console.log(err);}
-            drawMe();
-            $(form).find("[name=text]").val('');
-          });
-        return false;
+      // if we aren't in thread mode, go there
+      if (!elem.find('form.message')[0]) {
+        elem.html(config.t.showThread(thread));
+        elem.find("form").submit(formSubmit);
       }
 
       // load view on changes
@@ -67,19 +75,18 @@ exports.view = function(params) {
         }
       }
 
-      elem.html(config.t.showThread(thread));
-      elem.find("form").submit(formSubmit);
 
+
+      // setup the changes handler for this thread
+      // and run it. unregister old thread.
       coux.changes(config.dbUrl, drawMe);
-
-      // unregister on switch channels
     });
   });
 };
 
 // sidebar
 exports.index = function(params) {
-  console.log("params", params)
+  if (params.id) console.log("params.id", params.id);
   var elem = $(this);
   // console.log("list threads")
   // console.log("coux",[config.dbUrl,"_design","thread","_view","updated"].join('/'))

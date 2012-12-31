@@ -29,19 +29,17 @@
             </header>
             <ul>
             {{#rows}}
-                <li><a href="#{{path}}">{{value}}</a></li>
+                <li><a href="#{{path}}">{{value}}</a>
+{{#detail}}
+    <label>Owner:</label><h2>{{owner_id}}</h2>
+    {{#topic}}
+    <label>Topic:</label><p>{{topic}}</p>
+    {{/topic}}
+    <label>Members:</label><h3>{{members}}</h3>
+{{/detail}}
+                </li>
             {{/rows}}
             </ul>
-        </script>
-        <script type="text/mustache" id="threadsSidebarDetail-mu">
-            <label>Owner:</label>
-            <h2>{{owner_id}}</h2>
-            {{#topic}}
-            <label>Topic:</label>
-            <p>{{topic}}</p>
-            {{/topic}}
-            <label>Members:</label>
-            <h3>{{members}}</h3>
         </script>
         <script type="text/mustache" id="login-mu">
             <h2>Login or Signup</h2>
@@ -68,9 +66,8 @@
         <article>
             <form><label>Members</label>
             <input size="60" type="text" name="members" placeholder="@jchris @amysue"></input>
-
             <br/>
-            <label>Optional Topic Message</label>
+            <label>Optional Topic</label>
             <textarea name="topic"></textarea>
             <br/>
             <label>Invite</label>
@@ -79,7 +76,7 @@
         </article>
         </script>
         <script type="text/mustache" id="listMessages-mu">
-        <ul>
+        <ul data-thread_id="{{thread_id}}">
         {{#rows}}
             <li>{{#value}}{{author}}: {{text}}{{/value}}</li>
         {{/rows}}
@@ -88,12 +85,14 @@
         <script type="text/mustache" id="showThread-mu">
         <article>
             <header>
-                <form>
+                <form class="message">
                     <input type="text" size=40 name="text" placeholder="your message here"></input>
                     <input type="submit" value="Send"></input>
                 </form>
+                {{#topic}}
+                <p>{{topic}}</p>
+                {{/topic}}
             </header>
-            <br>
             <section class="thread">
             </section>
         </article>
