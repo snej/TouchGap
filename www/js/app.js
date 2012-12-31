@@ -26,7 +26,7 @@ $(function() {
     sidebar = $("#sidebar")[0],
     sidebarRoutes = {
       "/threads" : thread.index,
-      "/thread/:id" : thread.view
+      "/thread/:id" : thread.index
     };
 
     function initSyncOrLogin () {
@@ -39,7 +39,7 @@ $(function() {
               console.log("sync err", err);
               location.hash="/reset";
             } else {
-              location.hash="/";
+              // ok
             }
           });
         }

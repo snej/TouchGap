@@ -37,7 +37,7 @@ exports.view = function(params) {
 
       function formSubmit(e) {
         e.preventDefault();
-        var doc = jsonform(this);
+        var form = this, doc = jsonform(form);
         doc.author_id = user.user; // todo rename
         doc.created_at = doc.updated_at = new Date();
         doc.thread_id = thread._id;
@@ -47,7 +47,8 @@ exports.view = function(params) {
         console.log("message form", doc);
         coux.post(config.dbUrl, doc, function(err, ok){
           if (err) {return console.log(err);}
-            drawMe()
+            drawMe();
+            $(form).find("[name=text]").val('');
           });
         return false;
       }
@@ -58,6 +59,7 @@ exports.view = function(params) {
           getMessagesView(thread._id, function(err, view) {
             console.log("messages",err, view);
             if(err){return location.hash="/reload";}
+            // target a ul? add content around list?
             elem.find("section.thread").html(config.t.listMessages(view));
           });
         } else {
@@ -77,6 +79,7 @@ exports.view = function(params) {
 
 // sidebar
 exports.index = function(params) {
+  console.log("params", params)
   var elem = $(this);
   // console.log("list threads")
   // console.log("coux",[config.dbUrl,"_design","thread","_view","updated"].join('/'))
