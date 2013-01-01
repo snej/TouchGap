@@ -1,7 +1,4 @@
-var config = require('./config'),
-  auth = require('./auth'),
-  sync = require('./sync'),
-  mu = require("mustache").render;
+var config = require('./config');
 
 exports.reload = function() {
   location.hash="#/reloaded";
@@ -13,7 +10,8 @@ exports.reloaded = function() {
 
 exports.index = function() {
   // render index content html
-
+  var elem = $(this);
+  elem.html(config.t.index())
 }
 
 

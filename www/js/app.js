@@ -17,7 +17,7 @@ $(function() {
       "/login" : auth.login,
       "/reload" : home.reload,
       "/reloaded" : home.reloaded,
-      "/" : home.ready,
+      "/" : home.index,
       // "/ready" : home.ready,
       "/threads/new" : thread.create,
       "/thread/:id" : thread.view

@@ -56,11 +56,13 @@
             <p>You only need to enter this once. If you choose a username
             that is not on the server yet, you get a new account. If you choose a name you chose on another device, you have to get the password right.</p>
         </script>
-
+        <script type="text/mustache" id="index-mu">
+            Welcome to Threads. <a href="#/threads/new">Invite a friend to chat.</a>
+        </script>
         <script type="text/mustache" id="newThread-mu">
         <header>
             <h2>
-               {{user}}, invite friends to thread
+               {{user}}, invite friends to chat
             </h2>
         </header>
         <article>
@@ -76,22 +78,24 @@
         </article>
         </script>
         <script type="text/mustache" id="listMessages-mu">
+        {{#topic}}
+        <p>{{topic}}</p>
+        {{/topic}}
+
         <ul data-thread_id="{{thread_id}}">
+
         {{#rows}}
             <li>{{#value}}{{author}}: {{text}}{{/value}}</li>
         {{/rows}}
         </ul>
         </script>
-        <script type="text/mustache" id="showThread-mu">
+        <script type="text/mustache" id="threadMode-mu">
         <article>
             <header>
                 <form class="message">
                     <input type="text" size=40 name="text" placeholder="your message here"></input>
                     <input type="submit" value="Send"></input>
                 </form>
-                {{#topic}}
-                <p>{{topic}}</p>
-                {{/topic}}
             </header>
             <section class="thread">
             </section>

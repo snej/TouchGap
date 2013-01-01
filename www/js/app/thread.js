@@ -16,10 +16,42 @@ function getMessagesView(id, cb) {
   });
 }
 
-// var e = errh(function(err){
-//   console.err(err);
-//   location.hash = "/reload";
-// });
+function newMessageSubmit(e) {
+  e.preventDefault();
+  var form = this, doc = jsonform(form);
+  doc.author_id = user.user; // todo rename
+  doc.created_at = doc.updated_at = new Date();
+  doc.thread_id = $("section.thread ul").attr("data-thread_id");
+  doc.seq = last_seq++;
+  doc.type = "message";
+  // emit([doc.thread_id, doc.seq, doc.updated_at], doc.text);
+  console.log("new message", doc);
+  coux.post(config.dbUrl, doc, function(err, ok){
+    if (err) {return console.log(err);}
+    var input = $(form).find("[name=text]");
+    if (input.val() != doc.text) {
+      console.log("you've been working", input.val());
+    } else {
+      input.val('');
+    }
+  });
+}
+
+function setupChanges(thread) {
+  coux.changes(config.dbUrl, function() {
+    if (location.hash == "#/thread/"+thread._id) {
+      getMessagesView(thread._id, function(err, view) {
+        console.log("messages",err, view);
+        if(err){return location.hash="/reload";}
+        thread.rows = view.rows;
+        // target a ul? add content around list?
+        $("section.thread").html(config.t.listMessages(thread));
+      });
+    } else {
+      console.log("inactive draw for "+thread._id)
+    }
+  });
+}
 
 exports.view = function(params) {
   var elem = $(this);
@@ -28,26 +60,10 @@ exports.view = function(params) {
       location.hash = "/reload";
       return;
     };
-
-    function formSubmit(e) {
-      e.preventDefault();
-      var form = this, doc = jsonform(form);
-      doc.author_id = user.user; // todo rename
-      doc.created_at = doc.updated_at = new Date();
-      doc.thread_id = $("section.thread ul").attr("data-thread_id");
-      doc.seq = last_seq++;
-      doc.type = "message";
-      // emit([doc.thread_id, doc.seq, doc.updated_at], doc.text);
-      console.log("new message", doc);
-      coux.post(config.dbUrl, doc, function(err, ok){
-        if (err) {return console.log(err);}
-        var input = $(form).find("[name=text]");
-        if (input.val() != doc.text) {
-          console.log("you've been working", input.val());
-        } else {
-          input.val('');
-        }
-      });
+    // if we aren't in thread mode, go there
+    if (!elem.find('form.message')[0]) {
+      elem.html(config.t.threadMode());
+      elem.find("form").submit(newMessageSubmit);
     }
 
     // db.get(id, function() {});
@@ -55,31 +71,10 @@ exports.view = function(params) {
       if(err){return location.hash="/error";}
       console.log("thread", thread);
 
-      // if we aren't in thread mode, go there
-      if (!elem.find('form.message')[0]) {
-        elem.html(config.t.showThread(thread));
-        elem.find("form").submit(formSubmit);
-      }
 
-      // load view on changes
-      function drawMe() {
-        if (location.hash == "#/thread/"+thread._id) {
-          getMessagesView(thread._id, function(err, view) {
-            console.log("messages",err, view);
-            if(err){return location.hash="/reload";}
-            // target a ul? add content around list?
-            elem.find("section.thread").html(config.t.listMessages(view));
-          });
-        } else {
-          console.log("inactive draw for "+thread._id)
-        }
-      }
-
-
-
+      setupChanges(thread);
       // setup the changes handler for this thread
-      // and run it. unregister old thread.
-      coux.changes(config.dbUrl, drawMe);
+      // and run it. todo unregister old thread.
     });
   });
 };
