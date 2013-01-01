@@ -1,4 +1,5 @@
-var config = require('./config');
+var config = require('./config'),
+  auth = require('./auth');
 
 exports.reload = function() {
   location.hash="#/reloaded";
@@ -11,7 +12,9 @@ exports.reloaded = function() {
 exports.index = function() {
   // render index content html
   var elem = $(this);
-  elem.html(config.t.index())
+  auth.getUser(function(err, user){
+    elem.html(config.t.index(user))
+  });
 }
 
 

@@ -57,7 +57,14 @@
             that is not on the server yet, you get a new account. If you choose a name you chose on another device, you have to get the password right.</p>
         </script>
         <script type="text/mustache" id="index-mu">
-            Welcome to Threads. <a href="#/threads/new">Invite a friend to chat.</a>
+        <header>
+            <h2>
+               Welcome to Threads, {{user}}.
+            </h2>
+        </header>
+        <ul>
+            <a href="#/threads/new">Invite a friend to chat.</a>
+        </ul>
         </script>
         <script type="text/mustache" id="newThread-mu">
         <header>
@@ -93,8 +100,7 @@
         <article>
             <header>
                 <form class="message">
-                    <input type="text" size=40 name="text" placeholder="your message here"></input>
-                    <input type="submit" value="Send"></input>
+                    <input type="text" name="text" placeholder="your message here"></input>
                 </form>
             </header>
             <section class="thread">

@@ -16,7 +16,8 @@ function getMessagesView(id, cb) {
   });
 }
 
-function newMessageSubmit(e) {
+function makeNewMessageSubmit(user) {
+  return function(e) {
   e.preventDefault();
   var form = this, doc = jsonform(form);
   doc.author_id = user.user; // todo rename
@@ -35,6 +36,7 @@ function newMessageSubmit(e) {
       input.val('');
     }
   });
+}
 }
 
 function setupChanges(thread) {
@@ -63,7 +65,7 @@ exports.view = function(params) {
     // if we aren't in thread mode, go there
     if (!elem.find('form.message')[0]) {
       elem.html(config.t.threadMode());
-      elem.find("form").submit(newMessageSubmit);
+      elem.find("form").submit(makeNewMessageSubmit(user));
     }
 
     // db.get(id, function() {});
