@@ -12,9 +12,48 @@ function getMessagesView(id, cb) {
     if (!err && view.rows[0]) {
       last_seq = view.rows[0].key[1];
     }
+    view.rows.forEach(function(r) {
+      if (r.value.photo) {
+        r.value.path = "http://localhost.touchdb./threads/"+r.id+"/photo.jpg";
+      }
+    })
     cb(err, view)
   });
 }
+
+function makeNewPhotoClick(user) {
+  if (navigator.camera.getPicture) {
+    return function(e) {
+      e.preventDefault();
+      navigator.camera.getPicture(function(picData){
+        var doc = {
+          _attachments : {
+            "photo.jpg" : {
+              content_type : "image/jpg",
+              data : picData
+            }
+          }
+        };
+        doc.author_id = user.user; // todo rename
+        doc.created_at = doc.updated_at = new Date();
+        doc.thread_id = $("section.thread ul").attr("data-thread_id");
+        doc.seq = last_seq++;
+        doc.text = "photo";
+        doc.type = "message";
+        coux.post(config.dbUrl, doc, function(err, ok){
+          if (err) {return console.log(err);}
+          console.log("pic",ok)
+        });
+      }, function(err){console.error("camera err",err)}, {
+        quality : 25,
+        destinationType: Camera.DestinationType.DATA_URL
+      });
+    }
+  } else {
+    return function() {
+    };
+  }
+};
 
 function makeNewMessageSubmit(user) {
   return function(e) {
@@ -50,6 +89,8 @@ exports.view = function(params) {
     if (!elem.find('form.message')[0]) {
       elem.html(config.t.threadMode());
       elem.find("form").submit(makeNewMessageSubmit(user));
+      console.log("bind to photo link")
+      elem.find("a.photo").click(makeNewPhotoClick(user));
     }
 
     // db.get(id, function() {});
@@ -58,6 +99,7 @@ exports.view = function(params) {
       getMessagesView(thread._id, function(err, view) {
         if(err){return location.hash="/reload";}
         thread.rows = view.rows;
+        console.log(view.rows)
         $("section.thread").html(config.t.listMessages(thread));
       });
     });

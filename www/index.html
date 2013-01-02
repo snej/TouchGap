@@ -83,9 +83,17 @@
         </script>
         <script type="text/mustache" id="listMessages-mu">
         <ul data-thread_id="{{thread_id}}">
-
         {{#rows}}
-            <li>{{#value}}{{author}}: {{text}}{{/value}}</li>
+            <li>
+            {{#value}}
+            {{author}}:
+            {{text}}
+            {{#photo}}
+            <br/>
+              <img src="{{path}}" height="200px"/>
+            {{/photo}}
+            {{/value}}
+            </li>
         {{/rows}}
         </ul>
         </script>
@@ -94,7 +102,8 @@
             <header>
                 <form class="message">
                     <input type="text" name="text" placeholder="your message here"></input>
-                </form>
+                    <a href="#" class="photo">Photo</a>
+                    </form>
             </header>
             <section class="thread">
             </section>

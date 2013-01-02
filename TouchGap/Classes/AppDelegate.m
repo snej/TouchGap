@@ -79,7 +79,7 @@
         if (members && updated) {
             emit(updated, members);
         }
-    }) version: @"1.1"];
+    }) version: @"1.3"];
 
     [design defineViewNamed: @"messages" mapBlock: MAPBLOCK({
         id thread_id = [doc objectForKey: @"thread_id"];
@@ -87,11 +87,16 @@
         id updated_at = [doc objectForKey: @"updated_at"];
         id author = [doc objectForKey: @"author_id"];
         id text = [doc objectForKey: @"text"];
+        id atts = [doc objectForKey: @"_attachments"];
+        id val = ([NSMutableDictionary dictionaryWithObjectsAndKeys:text, @"text", author, @"author", nil]);
+        if (atts && [atts objectForKey:@"photo.jpg"]) {
+            [val setObject:@"photo.jpg" forKey:@"photo"];
+        }
         if (thread_id && chat_seq && updated_at && author) {
             emit([NSArray arrayWithObjects: thread_id, chat_seq, updated_at, nil],
-                 [NSDictionary dictionaryWithObjectsAndKeys:text, @"text", author, @"author", nil]);
+                 val);
         }
-    }) version: @"1.1"];
+    }) version: @"1.4"];
     
     NSLog(@"TouchDB url = %@", dburl);
 
