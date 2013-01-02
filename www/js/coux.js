@@ -104,8 +104,13 @@ coux.del = function() {
 
 coux.get = coux;
 
-coux.changes = function(dbname, onDBChange) {
+coux.changes = function(dbname, sinceSeq, onDBChange) {
     var since = 0;
+    if (typeof sinceSeq == "number") {
+      since = sinceSeq;
+    } else {
+      onDBChange = sinceSeq;
+    }
     function changesCallback(opts) {
       since = opts.last_seq || since;
       if (opts.results) {onDBChange(opts);}

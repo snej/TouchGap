@@ -64,13 +64,15 @@ function syncTheseChannels(user, channels) {
 }
 
 
-var syncInterval = false;
+// var syncInterval = false;
 function syncForUser(userDoc, cb) {
-  if (!syncInterval) {
-    syncInterval = setInterval(function() {
-      syncForUser(userDoc);
-    },10000);
-  }
+  // if (!syncInterval) {
+  //   syncInterval = setInterval(function() {
+  //     syncForUser(userDoc);
+  //   },10000);
+  // }
+
+
 
   // console.log("syncForUser", userDoc.user);
                             // silly cache
@@ -83,6 +85,11 @@ function syncForUser(userDoc, cb) {
   });
 };
 
-exports.trigger = syncForUser;
+exports.trigger = function(userDoc, cb) {
+  syncForUser(userDoc, cb);
+  return function(){
+    syncForUser(userDoc, cb);
+  }
+};
 
 

@@ -30,30 +30,14 @@ function makeNewMessageSubmit(user) {
   coux.post(config.dbUrl, doc, function(err, ok){
     if (err) {return console.log(err);}
     var input = $(form).find("[name=text]");
-    if (input.val() != doc.text) {
-      console.log("you've been working", input.val());
-    } else {
+    if (input.val() == doc.text) {
       input.val('');
     }
   });
 }
 }
 
-function setupChanges(thread) {
-  coux.changes(config.dbUrl, function() {
-    if (location.hash == "#/thread/"+thread._id) {
-      getMessagesView(thread._id, function(err, view) {
-        console.log("messages",err, view);
-        if(err){return location.hash="/reload";}
-        thread.rows = view.rows;
-        // target a ul? add content around list?
-        $("section.thread").html(config.t.listMessages(thread));
-      });
-    } else {
-      console.log("inactive draw for "+thread._id)
-    }
-  });
-}
+
 
 exports.view = function(params) {
   var elem = $(this);
@@ -71,12 +55,14 @@ exports.view = function(params) {
     // db.get(id, function() {});
     coux.get([config.dbUrl, params.id], function(err, thread) {
       if(err){return location.hash="/error";}
-      console.log("thread", thread);
+      console.log("thread view", thread);
 
-
-      setupChanges(thread);
-      // setup the changes handler for this thread
-      // and run it. todo unregister old thread.
+      getMessagesView(thread._id, function(err, view) {
+        console.log("ms", view)
+        if(err){return location.hash="/reload";}
+        thread.rows = view.rows;
+        $("section.thread").html(config.t.listMessages(thread));
+      });
     });
   });
 };
@@ -114,6 +100,7 @@ exports.create = function(params) {
       return;
     };
     elem.html(config.t.newThread(user));
+    // is this event handler getting stuck on?
     elem.find("form").submit(function(e) {
       e.preventDefault();
       var doc = jsonform(this);

@@ -60,9 +60,10 @@ function handleChannelsRequest(req, res) {
             return console.error(err);
           };
 
-          var channelIds = view.rows.map(function(r) {return r.key[1]});
+          var channelIds = view.rows.map(function(r) {return "ch-"+r.key[1]});
           res.statusCode = 200;
           console.log("channels"+channelIds);
+          channelIds.push("threads-"+data.user);
           baseCouchData.channels = channelIds;
           coux([baseCouchAuth,data.user], function(err, existingUserDoc) {
             if (err) {

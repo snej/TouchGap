@@ -9,8 +9,17 @@ var bucketDesignUrl = "http://animal.local:8091/couchBase/basecouch/_design/thre
 function syncFun(doc) {
   var ch = doc.thread_id || doc.wiki_id;
 	if (ch) {
-		sync(ch);
+		sync("ch-"+ch);
 	}
+  if (doc.members && doc.owner_id) {
+    sync("threads-"+doc.owner_id);
+    ms = doc.members.split(" ");
+    for (i = ms.length - 1; i >= 0; i--) {
+      if (ms[i]) {
+        sync("threads-"+ms[i]);
+      }
+    }
+  }
 }
 
 var ByMembersBucketView = function (doc, meta) {
