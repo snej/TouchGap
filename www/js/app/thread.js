@@ -55,10 +55,7 @@ exports.view = function(params) {
     // db.get(id, function() {});
     coux.get([config.dbUrl, params.id], function(err, thread) {
       if(err){return location.hash="/error";}
-      console.log("thread view", thread);
-
       getMessagesView(thread._id, function(err, view) {
-        console.log("ms", view)
         if(err){return location.hash="/reload";}
         thread.rows = view.rows;
         $("section.thread").html(config.t.listMessages(thread));

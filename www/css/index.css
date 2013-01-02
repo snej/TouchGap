@@ -34,7 +34,7 @@ input[type=text], input[type=password] {
     font-size: 100%;
 }
 
-.message input[type=text] {
+input[type=text] {
     width: 75%;
 }
 
