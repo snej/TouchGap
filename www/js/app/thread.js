@@ -38,11 +38,15 @@ function makeNewPhotoClick(user) {
         doc.created_at = doc.updated_at = new Date();
         doc.thread_id = $("section.thread ul").attr("data-thread_id");
         doc.seq = last_seq++;
-        doc.text = "photo";
+        doc.text = $("form.message [name=text]").val();
         doc.type = "message";
         coux.post(config.dbUrl, doc, function(err, ok){
           if (err) {return console.log(err);}
           console.log("pic",ok)
+          var input = $("form.message [name=text]");
+          if (input.val() == doc.text) {
+            input.val('');
+          }
         });
       }, function(err){console.error("camera err",err)}, {
         quality : 25,
