@@ -10,6 +10,8 @@ var baseCouchHost = "localhost:4984",
 var baseCouchAuth = "http://localhost:4985";
 var CouchbaseViews = "http://localhost:8092"
 
+var dbName = "threads";
+
 var push = require("./push");
 push.go();
 
@@ -50,7 +52,8 @@ function handleChannelsRequest(req, res) {
         // coux("http://"+data.user+":"+data.pass+"@"+baseCouchHost)
 
       // find channels with this user id:
-      coux([CouchbaseViews+"/basecouch/_design/threads/_view/by_members",
+      // for wiki this needs to be "wiki" instead of "threads"
+      coux([CouchbaseViews+"/basecouch/_design/"+dbName+"/_view/by_members",
           {stale:false,group:true,connection_timeout:60000,
             start_key : [data.user], end_key : [data.user, {}]}],
         function(err, view) {
@@ -133,8 +136,8 @@ var app = http.createServer(function(req, res){
   }
   var test
   var path = url.parse(req.url).pathname;
-  console.log("GET", path)
-  if (/^\/(thc|threads|_replicate|_replicator)/.test(path)) {
+  console.log(req.method, path)
+  if (/^\/(wiki|threads|_replicate|_replicator)/.test(path)) {
     var proxy = http.createClient(5984, 'localhost')
     var proxyRequest = proxy.request(req.method, req.url, req.headers);
     proxyRequest.on('response', function (proxyResponse) {
