@@ -110,16 +110,18 @@ exports.view = function(params) {
   });
 };
 
-// sidebar
-exports.index = function(params) {
-  if (params.id) console.log("params.id", params.id);
-  var elem = $(this);
-  // console.log("list threads")
-  // console.log("coux",[config.dbUrl,"_design","thread","_view","updated"].join('/'))
+function drawSidebar(elem, active) {
   coux.get([config.dbUrl,"_design","threads","_view","updated"], function(err, view) {
-    view.rows.forEach(function(row){
+    var activeOffset;
+    view.rows.forEach(function(row, i){
+      if (active && active._id == row.id) {
+        row.active = active;
+        activeOffset = i;
+      }
       row.path = "/thread/"+row.id;
     });
+    var activeRow = view.rows.splice(activeOffset, 1)[0];
+    view.rows.unshift(activeRow);
     // console.log(err, view);
     elem.html(config.t.threadsSidebar(view))
     elem.find(".new").click(function(){
@@ -130,6 +132,18 @@ exports.index = function(params) {
       $(this).parents("li").addClass("active");
     });
   });
+}
+
+// sidebar
+exports.index = function(params) {
+  var elem = $(this);
+  if (params.id) {
+    coux([config.dbUrl, params.id], function(err, doc){
+      drawSidebar(elem, doc)
+    });
+  } else {
+    drawSidebar(elem)
+  }
 };
 
 
