@@ -25,62 +25,93 @@ function makeNewPhotoClick(user) {
   if (navigator.camera.getPicture) {
     return function(e) {
       e.preventDefault();
-      navigator.camera.getPicture(function(picData){
-        var doc = {
-          _attachments : {
+      var form = this, doc = messageFromForm(user.user, form);
+      coux.post(config.dbUrl, doc, function(err, ok) {
+        navigator.camera.getPicture(function(picData){
+          doc._id = ok.id;
+          doc._rev = ok.rev;
+          doc._attachments = {
             "photo.jpg" : {
               content_type : "image/jpg",
               data : picData
             }
-          }
-        };
-        doc.author_id = user.user; // todo rename
-        doc.created_at = doc.updated_at = new Date();
-        doc.thread_id = $("section.thread ul").attr("data-thread_id");
-        doc.seq = last_seq++;
-        doc.text = $("form.message [name=text]").val();
-        doc.type = "message";
-        coux.post(config.dbUrl, doc, function(err, ok){
-          if (err) {return console.log(err);}
-          console.log("pic",ok)
-          var input = $("form.message [name=text]");
-          if (input.val() == doc.text) {
-            input.val('');
-          }
+          };
+          coux.put([config.dbUrl, doc._id], doc, function(err, ok){
+            if (err) {return console.log(err);}
+            console.log("pic",ok)
+            var input = $("form.message [name=text]");
+            if (input.val() == doc.text) {
+              input.val('');
+            }
+          });
+        }, function(err){console.error("camera err",err)}, {
+          quality : 25,
+          destinationType: Camera.DestinationType.DATA_URL
         });
-      }, function(err){console.error("camera err",err)}, {
-        quality : 25,
-        destinationType: Camera.DestinationType.DATA_URL
       });
     }
   } else {
     return function() {
+      console.error("no navigator.camera.getPicture")
     };
   }
 };
 
-function makeNewMessageSubmit(user) {
-  return function(e) {
-  e.preventDefault();
-  var form = this, doc = jsonform(form);
-  doc.author_id = user.user; // todo rename
+function messageFromForm(author_id, form) {
+  var doc = jsonform(form);
+  doc.author_id = author_id; // todo rename
   doc.created_at = doc.updated_at = new Date();
   doc.thread_id = $("section.thread ul").attr("data-thread_id");
   doc.seq = last_seq++;
   doc.type = "message";
+  return doc;
+};
+
+function makeNewMessageBubbles(user) { // todo put author id in the dom
+  console.log("makeNewMessageBubbles make", user.user);
+return function(e) {
+  e.preventDefault();
+  var form = this, doc = messageFromForm(user.user, form);
+  console.log("makeNewMessageBubbles", doc)
+  if (!$(form).find("[name=_id]").val()) {
+    // coux post doc, update dom with _id && _rev
+    coux.post(config.dbUrl, doc, function(err, ok){
+      if (err) {return console.log(err);}
+      console.log("made bubble", doc, ok.id);
+      var input = $(form).find("[name=text]");
+      if (input.val() == doc.text) {
+        input.val('');
+        $(form).find("[name=_id]").val(ok.id);
+        $(form).find("[name=_rev]").val(ok.rev);
+      }
+    });
+  }
+
+};
+}
+
+function makeNewMessageSubmit(user) {
+  return function(e) {
+  e.preventDefault();
+  var form = this, doc = messageFromForm(user.user, form);
   // emit([doc.thread_id, doc.seq, doc.updated_at], doc.text);
-  console.log("new message", doc);
+  console.log("makeNewMessageSubmit",doc);
   coux.post(config.dbUrl, doc, function(err, ok){
-    if (err) {return console.log(err);}
+    if (err) {
+      $(form).find("[name=_id]").val('');
+      $(form).find("[name=_rev]").val('');
+      return console.log(err);
+    }
+    console.log("makeNewMessageSubmit put",ok);
     var input = $(form).find("[name=text]");
     if (input.val() == doc.text) {
       input.val('');
+      $(form).find("[name=_id]").val('');
+      $(form).find("[name=_rev]").val('');
     }
   });
 }
 }
-
-
 
 exports.view = function(params) {
   var elem = $(this);
@@ -93,6 +124,11 @@ exports.view = function(params) {
     if (!elem.find('form.message')[0]) {
       elem.html(config.t.threadMode());
       elem.find("form").submit(makeNewMessageSubmit(user));
+      // elem.find("form input").on("focus", makeNewMessageBubbles(user));
+      elem.find("form input").on("focus", function(e){
+        var bbls = makeNewMessageBubbles(user);
+        bbls.call(elem.find("form"), e)
+      });
       console.log("bind to photo link")
       elem.find("a.photo").click(makeNewPhotoClick(user));
     }
@@ -103,7 +139,7 @@ exports.view = function(params) {
       getMessagesView(thread._id, function(err, view) {
         if(err){return location.hash="/reload";}
         thread.rows = view.rows;
-        console.log(view.rows)
+        // console.log(view.rows)
         $("section.thread").html(config.t.listMessages(thread));
       });
     });

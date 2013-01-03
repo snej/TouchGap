@@ -86,10 +86,10 @@ $(function() {
         var currentThread = location.hash.split('/').pop();
         if (doc.type == "message" && doc.thread_id == currentThread) {
           // redraw the chat
-          console.log("chat redraw", currentThread)
+          // console.log("chat redraw", currentThread)
           contentRouter.go(location.hash);
         } else if (doc.type = "thread") {
-          console.log("new thread", doc)
+          // console.log("new thread", doc)
           // redraw the sidebar
           sidebarRouter.go(location.hash)
           // get new channels from sync server
