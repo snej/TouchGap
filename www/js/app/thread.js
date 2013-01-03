@@ -67,28 +67,40 @@ function messageFromForm(author_id, form) {
   return doc;
 };
 
+function makeMessageBlur(user) {
+  return function(e) {
+    e.preventDefault();
+    var form = this,
+      doc = messageFromForm(user.user, form),
+      rev = $(form).find("[name=_rev]").val(),
+      id = $(form).find("[name=_id]").val();
+    console.log("blur", id, rev, doc);
+    if (id && rev) {
+      coux.del([config.dbUrl, id, {rev : rev}], function(err, ok){
+        console.log("blur cleaned")
+      });
+    }
+  }
+}
+
 function makeNewMessageBubbles(user) { // todo put author id in the dom
   console.log("makeNewMessageBubbles make", user.user);
 return function(e) {
   e.preventDefault();
   var form = this, doc = messageFromForm(user.user, form);
-  console.log("makeNewMessageBubbles", doc)
+  console.log("NewMessageBubbles", doc, $(form).find("[name=_id]").val())
   if (!$(form).find("[name=_id]").val()) {
-    console.log("makeNewMessageBubbles post", $(form).find("[name=_id]").val());
+    console.log("makeNewMessageBubbles post");
 
     // coux post doc, update dom with _id && _rev
     delete doc._id;
     delete doc._rev;
+    if (!doc.text) delete doc.text;
     coux.post(config.dbUrl, doc, function(err, ok){
       if (err) {return console.log(err);}
-      console.log("made bubble", doc, ok.id);
-      var input = $(form).find("[name=text]");
-      if (input.val() == doc.text) {
-        input.val('');
-        $(form).find("[name=_id]").val(ok.id);
-        $(form).find("[name=_rev]").val(ok.rev);
-        console.log(form);
-      }
+      console.log("made bubble", ok.id, ok.rev);
+      $(form).find("[name=_id]").val(ok.id);
+      $(form).find("[name=_rev]").val(ok.rev);
     });
   }
 
@@ -100,7 +112,10 @@ function makeNewMessageSubmit(user) {
   e.preventDefault();
   var form = this, doc = messageFromForm(user.user, form);
   // emit([doc.thread_id, doc.seq, doc.updated_at], doc.text);
-  console.log("makeNewMessageSubmit", form, $(form).find("[name=_id]").val());
+  if (!doc._rev) delete doc._rev;
+  if (!doc._id) delete doc._id;
+
+  console.log("makeNewMessageSubmit", doc, $(form).find("[name=_id]").val());
   coux.post(config.dbUrl, doc, function(err, ok){
     if (err) {
       $(form).find("[name=_id]").val('');
@@ -111,10 +126,10 @@ function makeNewMessageSubmit(user) {
     var input = $(form).find("[name=text]");
     if (input.val() == doc.text) {
       input.val('');
-      $(form).find("[name=_id]").val('');
-      $(form).find("[name=_rev]").val('');
-      console.log("makeNewMessageSubmit cleared",form);
     }
+    $(form).find("[name=_id]").val('');
+    $(form).find("[name=_rev]").val('');
+    console.log("makeNewMessageSubmit cleared",form);
   });
 }
 }
@@ -133,6 +148,10 @@ exports.view = function(params) {
       // elem.find("form input").on("focus", makeNewMessageBubbles(user));
       elem.find("form input").on("focus", function(e){
         var bbls = makeNewMessageBubbles(user);
+        bbls.call(elem.find("form"), e)
+      });
+      elem.find("form input").on("blur", function(e){
+        var bbls = makeMessageBlur(user);
         bbls.call(elem.find("form"), e)
       });
       console.log("bind to photo link")

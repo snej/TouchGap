@@ -86,12 +86,15 @@
         {{#rows}}
             <li>
             {{#value}}
-            {{author}}:
-            {{text}}
-            {{#photo}}
-            <br/>
-              <img src="{{path}}" height="200px"/>
-            {{/photo}}
+                {{author}}:
+                {{text}}
+                {{^text}}
+                ...
+                {{/text}}
+                {{#photo}}
+                    <br/>
+                    <img src="{{path}}" height="200px"/>
+                {{/photo}}
             {{/value}}
             </li>
         {{/rows}}

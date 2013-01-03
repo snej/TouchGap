@@ -88,7 +88,10 @@
         id author = [doc objectForKey: @"author_id"];
         id text = [doc objectForKey: @"text"];
         id atts = [doc objectForKey: @"_attachments"];
-        id val = ([NSMutableDictionary dictionaryWithObjectsAndKeys:text, @"text", author, @"author", nil]);
+        id val = ([NSMutableDictionary dictionaryWithObjectsAndKeys:author, @"author", nil]);
+        if (text) {
+            [val setObject:text forKey:@"text"];            
+        }
         if (atts && [atts objectForKey:@"photo.jpg"]) {
             [val setObject:@"photo.jpg" forKey:@"photo"];
         }
@@ -96,7 +99,7 @@
             emit([NSArray arrayWithObjects: thread_id, chat_seq, updated_at, nil],
                  val);
         }
-    }) version: @"1.4"];
+    }) version: @"1.7"];
     
     NSLog(@"TouchDB url = %@", dburl);
 

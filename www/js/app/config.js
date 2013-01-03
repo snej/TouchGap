@@ -1,17 +1,21 @@
-var config = module.exports = {t : {}},
-  mu = require("mustache");
+var config = module.exports = {
+    t : {}, dbName : "threads",
+    dbHost : 'http://localhost.touchdb.'
+  },
+  mu = require("mustache"),
+  SYNC_HOST = "animal.local";
 
-config.dbHost = 'http://localhost.touchdb.';
+if (!SYNC_HOST) {
+  console.log("please run with environment variable LAN_NAME=myhost.local");
+  console.log("see www/js/app/config.js to change environment variables")
+}
 
-config.channelServer = 'http://animal.local:3000/channels/';
-
-config.syncTarget = 'animal.local:4984/basecouch';
+config.channelServer = 'http://'+SYNC_HOST+':3000/channels/';
+config.syncTarget = SYNC_HOST+':4984/basecouch';
 
 if (location.protocol != "file:") {
   config.dbHost = location.origin;
 }
-
-config.dbName = "threads";
 
 config.dbUrl = config.dbHost + '/' + config.dbName;
 
