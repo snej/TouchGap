@@ -74,7 +74,11 @@ return function(e) {
   var form = this, doc = messageFromForm(user.user, form);
   console.log("makeNewMessageBubbles", doc)
   if (!$(form).find("[name=_id]").val()) {
+    console.log("makeNewMessageBubbles post", $(form).find("[name=_id]").val());
+
     // coux post doc, update dom with _id && _rev
+    delete doc._id;
+    delete doc._rev;
     coux.post(config.dbUrl, doc, function(err, ok){
       if (err) {return console.log(err);}
       console.log("made bubble", doc, ok.id);
@@ -83,6 +87,7 @@ return function(e) {
         input.val('');
         $(form).find("[name=_id]").val(ok.id);
         $(form).find("[name=_rev]").val(ok.rev);
+        console.log(form);
       }
     });
   }
@@ -95,7 +100,7 @@ function makeNewMessageSubmit(user) {
   e.preventDefault();
   var form = this, doc = messageFromForm(user.user, form);
   // emit([doc.thread_id, doc.seq, doc.updated_at], doc.text);
-  console.log("makeNewMessageSubmit",doc);
+  console.log("makeNewMessageSubmit", form, $(form).find("[name=_id]").val());
   coux.post(config.dbUrl, doc, function(err, ok){
     if (err) {
       $(form).find("[name=_id]").val('');
@@ -108,6 +113,7 @@ function makeNewMessageSubmit(user) {
       input.val('');
       $(form).find("[name=_id]").val('');
       $(form).find("[name=_rev]").val('');
+      console.log("makeNewMessageSubmit cleared",form);
     }
   });
 }
