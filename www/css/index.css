@@ -4,26 +4,45 @@
  *
  */
 
+ /* iPad [portrait + landscape] */
+ @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+    body {
+        font-size: 180%;
+    }
+ }
+
+ /* iPhone [portrait + landscape] */
+/* @media only screen and (max-device-width: 480px) {
+    body {
+        font-size: 100%;
+    }
+ }*/
+
 body {
     font-family: sans-serif;
-    font-size: 180%;
     margin:0; padding: 0;
+}
+
+.touch {
+    background: #efe;
 }
 
 /* Landscape layout (with min-width) */
 /*@media screen and (min-aspect-ratio: 1/1) and (min-width:400px) {}*/
 
-input[type=text] {
+input[type=text], input[type=password] {
     font-size: 100%;
+}
+
+input[type=text] {
+    width: 75%;
 }
 
 textarea {
     display: block;
    font-family: inherit;
    font-size: inherit;
-   width:100%;
-   padding:14px;
-   margin:0 -14px;
+   width:40%;
 }
 
 h2 {
@@ -40,20 +59,10 @@ h2 {
     clear:both;
 }
 
-/* css hack for position fixed glitch on ios6
-   http://igstudio.blogspot.de/2012/09/positionfixed-in-ios-6.html */
-@font-face {
-    font-family: "FixFont";
-    src: url();
-}
-
 #sidebar {
     float:left;
-    width: 30%;
-    position: fixed;
-    top:0;
-    bottom:0;
-    font-family: "FixFont", sans-serif;
+    width: 20%;
+    /*height: 1000px;*/
     background-image: linear-gradient(        right bottom, rgb(238,238,238) 0%, rgb(250,250,250) 75%, rgb(255,255,255) 100%);
     background-image: -moz-linear-gradient(   right bottom, rgb(238,238,238) 0%, rgb(250,250,250) 75%, rgb(255,255,255) 100%);
     background-image: -webkit-linear-gradient(right bottom, rgb(238,238,238) 0%, rgb(250,250,250) 75%, rgb(255,255,255) 100%);
@@ -67,6 +76,14 @@ h2 {
     background-image: -webkit-linear-gradient(left top, rgb(238,238,238) 40%, rgb(250,250,250) 75%, rgb(255,255,255) 100%);
 }
 
+.thread ul {
+    margin: 0; padding-left: 12px;
+    list-style: none;
+}
+
+.thread li {
+    padding: 2px
+}
 
 #sidebar ul {
     font-size: 75%;
@@ -83,11 +100,11 @@ h2 {
 
 #content {
     float:right;
-    width: 70%
+    width: 80%
 }
 
 #content .details {
-    margin-top: 4em;
+    /*margin-top: 4em;*/
     font-size: 50%
 }
 
@@ -99,57 +116,28 @@ input.save {
 }
 
 header .new {
-    margin:8px;
+    /*margin:8px;*/
     float:right;
 }
 
-#content article {
-    padding: 1em 32px;
-}
-
 #content header {
-    top:0;
-    position: fixed;
-    width:70%;
     margin:0;
     padding:4px;
     background: #fff;
 }
-
-
-
 
 .help {
     float:right;
     font-size: 75%
 }
 
-form.note {
+form {
     border:#ddd solid 1px;
     background:#EEE;
-    margin: 3em 32px;
+    /*margin: 1em 32px;*/
     padding: 8px;
 }
 
-#content form.note .details {
-    margin-top: 0;
-}
-
-/*.edit {
-    padding: 16px;
-    margin: 16px;
-    background:#ffffef;
-    border: 1px solid #ee8;
-}
-.edit textarea {
-    margin-top: 16px
-}
-
-.edit input[type=submit] {
-    float:right;
-    margin:16px 32px;
-}
-*/
 label {
     float:left;
     display: block;
@@ -158,13 +146,6 @@ label {
     text-align: right;
 }
 
-/*
-.edit
-
-form.edit input[type=text] {
-    margin-top:4px;
-}
-*/
 label {
     font-weight: lighter;
     color:#888;

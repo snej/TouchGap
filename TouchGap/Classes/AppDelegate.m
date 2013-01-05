@@ -62,12 +62,12 @@
  */
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
 {
-    
+
     /* TouchDB initialization */
 
     CouchTouchDBServer* server = [CouchTouchDBServer sharedInstance];
     if (server.error) [self failed: server.error];
-    self.database = [server databaseNamed: @"notes"];  // db name must be lowercase!
+    self.database = [server databaseNamed: @"threads"];  // db name must be lowercase!
     NSError* error;
     if (![self.database ensureCreated: &error]) [self failed: error];
 
@@ -77,12 +77,35 @@
     }];
 
     NSURL* dburl = [TDURLProtocol HTTPURLForServerURL: database.URL];
-    
-    CouchDesignDocument* design = [database designDocumentWithName: @"notes"];
-    [design defineViewNamed: @"title" mapBlock: MAPBLOCK({
-        id title = [doc objectForKey: @"title"];
-        if (title) emit(0, title);
-    }) version: @"1.1"];
+
+    CouchDesignDocument* design = [database designDocumentWithName: @"threads"];
+    [design defineViewNamed: @"updated" mapBlock: MAPBLOCK({
+        id members = [doc objectForKey: @"members"];
+        id updated = [doc objectForKey: @"updated_at"];
+        if (members && updated) {
+            emit(updated, members);
+        }
+    }) version: @"1.3"];
+
+    [design defineViewNamed: @"messages" mapBlock: MAPBLOCK({
+        id thread_id = [doc objectForKey: @"thread_id"];
+        id chat_seq = [doc objectForKey: @"seq"];
+        id updated_at = [doc objectForKey: @"updated_at"];
+        id author = [doc objectForKey: @"author_id"];
+        id text = [doc objectForKey: @"text"];
+        id atts = [doc objectForKey: @"_attachments"];
+        id val = ([NSMutableDictionary dictionaryWithObjectsAndKeys:author, @"author", nil]);
+        if (text) {
+            [val setObject:text forKey:@"text"];            
+        }
+        if (atts && [atts objectForKey:@"photo.jpg"]) {
+            [val setObject:@"photo.jpg" forKey:@"photo"];
+        }
+        if (thread_id && chat_seq && updated_at && author) {
+            emit([NSArray arrayWithObjects: thread_id, chat_seq, updated_at, nil],
+                 val);
+        }
+    }) version: @"1.7"];
     
     NSLog(@"TouchDB url = %@", dburl);
 
