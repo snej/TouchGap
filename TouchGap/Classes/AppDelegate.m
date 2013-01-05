@@ -27,6 +27,7 @@
 
 #import "AppDelegate.h"
 #import "MainViewController.h"
+#import "TDJSViewCompiler.h"
 
 #import <Cordova/CDVPlugin.h>
 #import <CouchCocoa/CouchCocoa.h>
@@ -69,7 +70,12 @@
     self.database = [server databaseNamed: @"notes"];  // db name must be lowercase!
     NSError* error;
     if (![self.database ensureCreated: &error]) [self failed: error];
-    
+
+    [server tellTDServer: ^(TDServer* tdServer) {
+        // Register support for JavaScript-language map/reduce functions:
+        [TDView setCompiler: [[TDJSViewCompiler alloc] init]];
+    }];
+
     NSURL* dburl = [TDURLProtocol HTTPURLForServerURL: database.URL];
     
     CouchDesignDocument* design = [database designDocumentWithName: @"notes"];
@@ -91,10 +97,10 @@
     }
 
     CGRect screenBounds = [[UIScreen mainScreen] bounds];
-    self.window = [[[UIWindow alloc] initWithFrame:screenBounds] autorelease];
+    self.window = [[UIWindow alloc] initWithFrame:screenBounds];
     self.window.autoresizesSubviews = YES;
 
-    self.viewController = [[[MainViewController alloc] init] autorelease];
+    self.viewController = [[MainViewController alloc] init];
     self.viewController.useSplashScreen = YES;
     self.viewController.wwwFolderName = @"www";
     self.viewController.startPage = @"index.html";
